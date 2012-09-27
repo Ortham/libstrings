@@ -183,7 +183,7 @@ LIBSTRINGS uint32_t GetStrings(strings_handle sh, string_data ** strings, size_t
 	try {
 		sh->extStringDataArr = new string_data[sh->extStringDataArrSize];
 		size_t i=0;
-		for (map<uint32_t, string>::iterator it=sh->data.begin(), endIt=sh->data.end(); it != endIt; ++it) {
+		for (boost::unordered_map<uint32_t, string>::iterator it=sh->data.begin(), endIt=sh->data.end(); it != endIt; ++it) {
 			sh->extStringDataArr[i].id = it->first;
 			sh->extStringDataArr[i].data = sh->GetString(it->second);
 			i++;
@@ -259,7 +259,7 @@ LIBSTRINGS uint32_t GetString(strings_handle sh, const uint32_t stringId, uint8_
 
 	//Find string.
 	try {
-		map<uint32_t, std::string>::iterator it = sh->data.find(stringId);
+		boost::unordered_map<uint32_t, std::string>::iterator it = sh->data.find(stringId);
 		if (it != sh->data.end())
 			sh->extString = sh->GetString(it->second);
 	} catch (bad_alloc /*&e*/) {
@@ -283,7 +283,7 @@ LIBSTRINGS uint32_t SetStrings(strings_handle sh, const string_data * strings, c
 	if (sh == NULL || strings == NULL) //Check for valid args.
 		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.").code();
 
-	map<uint32_t, string> newMap;
+	boost::unordered_map<uint32_t, string> newMap;
 
 	try {
 		for (size_t i=0; i < numStrings; i++) {
@@ -334,7 +334,7 @@ LIBSTRINGS uint32_t EditString(strings_handle sh, const uint32_t stringId, const
 		return e.code();
 	}
 
-	map<uint32_t, string>::iterator it = sh->data.find(stringId);
+	boost::unordered_map<uint32_t, string>::iterator it = sh->data.find(stringId);
 	if (it == sh->data.end())
 		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "The given ID does not exist.").code();
 	
@@ -349,7 +349,7 @@ LIBSTRINGS uint32_t RemoveString(strings_handle sh, const uint32_t stringId) {
 	if (sh == NULL) //Check for valid args.
 		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.").code();
 
-	map<uint32_t, string>::iterator it = sh->data.find(stringId);
+	boost::unordered_map<uint32_t, string>::iterator it = sh->data.find(stringId);
 	if (it == sh->data.end())
 		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "The given ID does not exist.").code();
 

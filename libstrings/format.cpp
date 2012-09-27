@@ -149,7 +149,7 @@ strings_handle_int::~strings_handle_int() {
 		string strData;
 		boost::unordered_map<string, uint32_t> hashmap;
 
-		for (map<uint32_t, string>::iterator it=data.begin(), endIt=data.end(); it != endIt; ++it) {
+		for (boost::unordered_map<uint32_t, string>::iterator it=data.begin(), endIt=data.end(); it != endIt; ++it) {
 
 			/* Search for this pair's string in the hashset.
 			   If present, use the offset in the hashmap for the directory entry's offset,

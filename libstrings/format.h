@@ -44,7 +44,7 @@ struct strings_handle_int {
 	bool isEdited;			//Init to false, true if an editing function is called, decides whether to disk write on destruct.
 
 	//File data.
-	std::map<uint32_t, std::string> data;	//Internal data storage. uint32_t is the string id and std::string is the string itself.
+	boost::unordered_map<uint32_t, std::string> data;	//Internal data storage. uint32_t is the string id and std::string is the string itself.
 
 	//External data pointers.
 	string_data * extStringDataArr;
