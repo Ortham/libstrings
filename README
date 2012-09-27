@@ -1,6 +1,6 @@
 libstrings
 
-libstrings is a free software library for reading and writing TES IV: Skyrim's
+libstrings is a free software library for reading and writing TES V: Skyrim's
 .STRINGS, .DLSTRINGS and .ILSTRINGS files.
 
 Please see the HTML readme file at libstrings-readme.html for
