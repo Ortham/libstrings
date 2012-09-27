@@ -50,14 +50,10 @@ namespace libstrings {
 			return errSubject;
 		else if (errCode == LIBSTRINGS_ERROR_NO_MEM)
 			return "Memory allocation failed.";
-		else if (errCode == LIBSTRINGS_ERROR_FILE_NOT_FOUND)
-			return (boost::format("\"%1%\" cannot be found!") % errSubject).str();
 		else if (errCode == LIBSTRINGS_ERROR_FILE_READ_FAIL)
 			return (boost::format("\"%1%\" cannot be read!") % errSubject).str(); 
 		else if (errCode == LIBSTRINGS_ERROR_FILE_WRITE_FAIL)
 			return (boost::format("\"%1%\" cannot be written to!") % errSubject).str();
-		else if (errCode == LIBSTRINGS_ERROR_FILE_CORRUPT)
-			return (boost::format("\"%1%\" is corrupt.") % errSubject).str();
 		else if (errCode == LIBSTRINGS_ERROR_BAD_STRING)
 			return (boost::format("\"%1%\" cannot be converted from UTF-8 to \"%2%\".") % errSubject % errDetail).str();
 		else

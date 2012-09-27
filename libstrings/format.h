@@ -35,13 +35,8 @@
    File data is stored in its original encoding. 
    Data strings are converted to and from UTF-8 when being obtained from input and sent to output. */
 struct strings_handle_int {
-	strings_handle_int(std::string filePath);
+	strings_handle_int(std::string path);
 	~strings_handle_int();
-
-	//File metadata.
-	std::string path;
-	bool isDotStrings;		//Used to determine whether or not to look for lengths in the raw string data. Set according to file extension.
-	bool isEdited;			//Init to false, true if an editing function is called, decides whether to disk write on destruct.
 
 	//File data.
 	boost::unordered_map<uint32_t, std::string> data;	//Internal data storage. uint32_t is the string id and std::string is the string itself.
@@ -60,6 +55,9 @@ struct strings_handle_int {
 
 	//All the unreferenced strings in the file.
 	boost::unordered_set<std::string> unrefStrings;
+
+	//Save file data to given path.
+	void Save(std::string path);
 
 	//Used to generate library output strings.
 	uint8_t * GetString(std::string str);

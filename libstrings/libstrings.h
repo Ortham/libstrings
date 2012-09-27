@@ -81,13 +81,10 @@ typedef struct {
 LIBSTRINGS extern const uint32_t LIBSTRINGS_OK;
 LIBSTRINGS extern const uint32_t LIBSTRINGS_ERROR_INVALID_ARGS;
 LIBSTRINGS extern const uint32_t LIBSTRINGS_ERROR_NO_MEM;
-LIBSTRINGS extern const uint32_t LIBSTRINGS_ERROR_FILE_NOT_FOUND;
 LIBSTRINGS extern const uint32_t LIBSTRINGS_ERROR_FILE_WRITE_FAIL;
 LIBSTRINGS extern const uint32_t LIBSTRINGS_ERROR_FILE_READ_FAIL;
-LIBSTRINGS extern const uint32_t LIBSTRINGS_ERROR_FILE_CORRUPT;
 LIBSTRINGS extern const uint32_t LIBSTRINGS_ERROR_BAD_STRING;
 LIBSTRINGS extern const uint32_t LIBSTRINGS_RETURN_MAX;
-/* No doubt there will be more... */
 
 
 /*------------------------------
@@ -122,11 +119,12 @@ LIBSTRINGS void CleanUpErrorDetails();
    extension is used to determine the string data format used. */
 LIBSTRINGS uint32_t OpenStringsFile(strings_handle * sh, const uint8_t * path);
 
-/* Closes the file associated with the given handle. No changes are written
-   until the handle is closed. Closing the handle also frees any memory 
-   allocated during its use. If save is true and the file has been edited,
-   the changes will be written to disk, otherwise they will be discarded. */
-LIBSTRINGS void CloseStringsFile(strings_handle sh, const bool save);
+/* Saves the strings associated with the given handle to the given path. */
+LIBSTRINGS uint32_t SaveStringsFile(strings_handle sh, const uint8_t * path);
+
+/* Closes the file associated with the given handle, freeing any memory 
+   allocated during its use. */
+LIBSTRINGS void CloseStringsFile(strings_handle sh);
 
 
 /*------------------------------

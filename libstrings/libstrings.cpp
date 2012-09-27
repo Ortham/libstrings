@@ -54,9 +54,7 @@ LIBSTRINGS const uint32_t LIBSTRINGS_ERROR_INVALID_ARGS		= 1;
 LIBSTRINGS const uint32_t LIBSTRINGS_ERROR_NO_MEM			= 2;
 LIBSTRINGS const uint32_t LIBSTRINGS_ERROR_FILE_READ_FAIL	= 3;
 LIBSTRINGS const uint32_t LIBSTRINGS_ERROR_FILE_WRITE_FAIL	= 4;
-LIBSTRINGS const uint32_t LIBSTRINGS_ERROR_FILE_NOT_FOUND	= 5;
-LIBSTRINGS const uint32_t LIBSTRINGS_ERROR_FILE_CORRUPT		= 6;
-LIBSTRINGS const uint32_t LIBSTRINGS_ERROR_BAD_STRING		= 7;
+LIBSTRINGS const uint32_t LIBSTRINGS_ERROR_BAD_STRING		= 5;
 LIBSTRINGS const uint32_t LIBSTRINGS_RETURN_MAX				= LIBSTRINGS_ERROR_BAD_STRING;
 
 
@@ -141,15 +139,24 @@ LIBSTRINGS uint32_t OpenStringsFile(strings_handle * sh, const uint8_t * path) {
 	return LIBSTRINGS_OK;
 }
 
-/* Closes the file associated with the given handle. No changes are written
-   until the handle is closed. Closing the handle also frees any memory 
-   allocated during its use. If save is true and the file has been edited,
-   the changes will be written to disk, otherwise they will be discarded. */
-LIBSTRINGS void CloseStringsFile(strings_handle sh, const bool save) {
-	if (!save)
-		sh->isEdited = false;
-	if (sh != NULL)
-		delete sh;
+/* Saves the strings associated with the given handle to the given path. */
+LIBSTRINGS uint32_t SaveStringsFile(strings_handle sh, const uint8_t * path) {
+	if (sh == NULL || path == NULL)
+		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.").code();
+
+	try {
+		sh->Save(string(reinterpret_cast<const char *>(path)));
+	} catch (error e) {
+		return e.code();
+	}
+
+	return LIBSTRINGS_OK;
+}
+
+/* Closes the file associated with the given handle, freeing any memory 
+   allocated during its use. */
+LIBSTRINGS void CloseStringsFile(strings_handle sh) {
+	delete sh;
 }
 
 
@@ -298,7 +305,6 @@ LIBSTRINGS uint32_t SetStrings(strings_handle sh, const string_data * strings, c
 	}
 
 	sh->data = newMap;
-	sh->isEdited = true;
 
 	return LIBSTRINGS_OK;
 }
@@ -319,7 +325,6 @@ LIBSTRINGS uint32_t AddString(strings_handle sh, const uint32_t stringId, const 
 	if (!sh->data.insert(pair<uint32_t, string>(stringId, strString)).second)
 		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "The given ID already exists.").code();
 	
-	sh->isEdited = true;
 	return LIBSTRINGS_OK;
 }
 
@@ -341,7 +346,6 @@ LIBSTRINGS uint32_t EditString(strings_handle sh, const uint32_t stringId, const
 		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "The given ID does not exist.").code();
 	
 	it->second = strString;
-	sh->isEdited = true;
 
 	return LIBSTRINGS_OK;
 }
@@ -356,7 +360,6 @@ LIBSTRINGS uint32_t RemoveString(strings_handle sh, const uint32_t stringId) {
 		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "The given ID does not exist.").code();
 
 	sh->data.erase(it);
-	sh->isEdited = true;
 
 	return LIBSTRINGS_OK;
 }

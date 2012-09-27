@@ -3,26 +3,5 @@ libstrings
 libstrings is a free software library for reading and writing TES IV: Skyrim's
 .STRINGS, .DLSTRINGS and .ILSTRINGS files.
 
-Note: This library is very much a work in progress and subject to significant
-change. It is not release-ready.
-
-If a file is loaded then saved by libstrings, the order of strings and 
-directory entries within the file may not match their order in the original
-file. This does not affect Skyrim's handling of the files, as the order does 
-not matter to it.
-
-libstrings will automatically clean out any unreferenced strings when it saves
-a file. This can be avoided by getting an array of such strings using
-GetUnreferencedStrings then assigning them IDs and adding them back in.
-
-Known Issues:
-
-  * Editing functions are untested.
-  * No docs.
-  
-Planned Enhancements:
-
-  * Thread safety.
-
-libstrings is licensed under the GNU General Public License v3.0. For the full
-text of the license, see the included "LICENSE" file.
+Please see the HTML readme file at libstrings-readme.html for
+more information.

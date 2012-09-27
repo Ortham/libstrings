@@ -42,6 +42,7 @@ int main() {
 
 	strings_handle sh;
 	uint8_t * path = reinterpret_cast<uint8_t *>("C:/Program Files (x86)/Steam/steamapps/common/skyrim/Data/Strings/Skyrim_English.STRINGS");
+	uint8_t * newPath = reinterpret_cast<uint8_t *>("C:/Program Files (x86)/Steam/steamapps/common/skyrim/Data/Strings/Skyrim_English-new.STRINGS");
 	uint8_t * testMessage = reinterpret_cast<uint8_t *>("This is a test message.");
 	uint32_t ret;
 	string_data * dataArr;
@@ -167,8 +168,16 @@ int main() {
 		}
 	}
 
-	out << "TESTING CloseStringsFile(...)" << endl;
-	CloseStringsFile(sh, true);
+	out << "TESTING SaveStringsFile(...)" << endl;
+	ret = SaveStringsFile(sh, newPath);
+	if (ret != LIBSTRINGS_OK)
+		out << '\t' << "SaveStrings(...) failed! Return code: " << ret << endl;
+	else {
+		out << '\t' << "SaveStrings(...) successful!" << endl;
+	}
+
+	out << "TESTING SaveStringsFile(...)" << endl;
+	CloseStringsFile(sh);
 
 	out.close();
 	return 0;

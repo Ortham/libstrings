@@ -35,17 +35,17 @@ using namespace libstrings;
 
 namespace fs = boost::filesystem;
 
-strings_handle_int::strings_handle_int(string filePath) :
-	path(filePath),
-	isEdited(false),
+strings_handle_int::strings_handle_int(string path) :
 	extStringDataArr(NULL),
 	extStringArr(NULL),
 	extString(NULL),
 	extStringDataArrSize(0),
 	extStringArrSize(0) {
 
+	bool isDotStrings;
+
 	//Check extension.
-	const string ext = fs::path(filePath).extension().string();
+	const string ext = fs::path(path).extension().string();
 	if (ext == ".STRINGS")
 		isDotStrings = true;
 	else if (ext == ".DLSTRINGS" || ext == ".ILSTRINGS")
@@ -60,7 +60,7 @@ strings_handle_int::strings_handle_int(string filePath) :
 	if (fs::exists(path)) {
 		ifstream in(path.c_str(), ios::binary);
 		if (!in.good())
-			throw error(LIBSTRINGS_ERROR_FILE_READ_FAIL, filePath);
+			throw error(LIBSTRINGS_ERROR_FILE_READ_FAIL, path);
 
 		/*The data for each string is stored in two separate places.
 		The directory holds all the IDs and offsets, and the data block 
@@ -107,7 +107,7 @@ strings_handle_int::strings_handle_int(string filePath) :
 			//Find position of null pointer.
 			char * nptr = strchr((char*)(fileContent + strPos), '\0');
 			if (nptr == NULL)
-				throw error(LIBSTRINGS_ERROR_FILE_READ_FAIL, filePath);
+				throw error(LIBSTRINGS_ERROR_FILE_READ_FAIL, path);
 
 			str = string((char*)(fileContent + strPos), nptr - (char*)(fileContent + strPos));
 
@@ -143,60 +143,6 @@ strings_handle_int::strings_handle_int(string filePath) :
 }
 
 strings_handle_int::~strings_handle_int() {
-	if (isEdited) {
-		//Save everything in memory to the file.
-		string directory;
-		string strData;
-		boost::unordered_map<string, uint32_t> hashmap;
-
-		for (boost::unordered_map<uint32_t, string>::iterator it=data.begin(), endIt=data.end(); it != endIt; ++it) {
-
-			/* Search for this pair's string in the hashset.
-			   If present, use the offset in the hashmap for the directory entry's offset,
-			   and don't add the string again.
-			   Otherwise, add as normal. */
-
-			boost::unordered_map<string, uint32_t>::iterator searchIt = hashmap.find(it->second);
-			if (searchIt != hashmap.end()) {
-				//Write directory data to its buffer.
-				directory	+= string((char*)&(it->first), sizeof(uint32_t))
-							+  string((char*)&(searchIt->second), sizeof(uint32_t));
-			} else {
-				uint32_t len = strData.length();
-
-				//Write directory data to its buffer.
-				directory	+= string((char*)&(it->first), sizeof(uint32_t))
-							+  string((char*)&len, sizeof(uint32_t));
-		
-				//Write string data to its buffer, and increment the dataSize.
-				string str = it->second + '\0';
-				if (!isDotStrings) {
-					uint32_t size = str.length();
-					str = string((char*)&size, sizeof(uint32_t)) + str;
-				}
-				strData += str;
-
-				//Add to hashset to prevent it being written again.
-				hashmap.insert(pair<string, uint32_t>(it->second, len));
-			}
-
-			
-		}
-		uint32_t count = data.size();
-		uint32_t dataSize = strData.length();
-
-		//Now write out everything.
-		ofstream out((path + ".new").c_str(), ios::binary | ios::trunc);
-		if (!out.good())
-			throw error(LIBSTRINGS_ERROR_FILE_READ_FAIL, path);
-		out.write((char*)&count, sizeof(uint32_t));
-		out.write((char*)&dataSize, sizeof(uint32_t));
-		out.write((char*)directory.data(), directory.length());
-		out.write((char*)strData.data(), strData.length());
-
-		out.close();
-	}
-
 	if (extString != NULL)
 		delete [] extString;
 
@@ -211,6 +157,72 @@ strings_handle_int::~strings_handle_int() {
 			delete [] extStringArr[i];
 		delete [] extStringArr;
 	}
+}
+
+//Save file data to given path.
+void strings_handle_int::Save(std::string path) {
+	//Save everything in memory to the file.
+	string directory;
+	string strData;
+	boost::unordered_map<string, uint32_t> hashmap;
+	bool isDotStrings;
+
+	//Check extension.
+	const string ext = fs::path(path).extension().string();
+	if (ext == ".STRINGS")
+		isDotStrings = true;
+	else if (ext == ".DLSTRINGS" || ext == ".ILSTRINGS")
+		isDotStrings = false;
+	else
+		throw error(LIBSTRINGS_ERROR_INVALID_ARGS, "File passed does not have a valid extension.");
+
+	//Output to buffers.
+	for (boost::unordered_map<uint32_t, string>::iterator it=data.begin(), endIt=data.end(); it != endIt; ++it) {
+
+		/* Search for this pair's string in the hashset.
+			If present, use the offset in the hashmap for the directory entry's offset,
+			and don't add the string again.
+			Otherwise, add as normal. */
+
+		boost::unordered_map<string, uint32_t>::iterator searchIt = hashmap.find(it->second);
+		if (searchIt != hashmap.end()) {
+			//Write directory data to its buffer.
+			directory	+= string((char*)&(it->first), sizeof(uint32_t))
+						+  string((char*)&(searchIt->second), sizeof(uint32_t));
+		} else {
+			uint32_t len = strData.length();
+
+			//Write directory data to its buffer.
+			directory	+= string((char*)&(it->first), sizeof(uint32_t))
+						+  string((char*)&len, sizeof(uint32_t));
+		
+			//Write string data to its buffer, and increment the dataSize.
+			string str = it->second + '\0';
+			if (!isDotStrings) {
+				uint32_t size = str.length();
+				str = string((char*)&size, sizeof(uint32_t)) + str;
+			}
+			strData += str;
+
+			//Add to hashset to prevent it being written again.
+			hashmap.insert(pair<string, uint32_t>(it->second, len));
+		}
+
+			
+	}
+	uint32_t count = data.size();
+	uint32_t dataSize = strData.length();
+
+	//Now write out everything.
+	ofstream out(path.c_str(), ios::binary | ios::trunc);
+	if (!out.good())
+		throw error(LIBSTRINGS_ERROR_FILE_WRITE_FAIL, path);
+	out.write((char*)&count, sizeof(uint32_t));
+	out.write((char*)&dataSize, sizeof(uint32_t));
+	out.write((char*)directory.data(), directory.length());
+	out.write((char*)strData.data(), strData.length());
+
+	out.close();
 }
 
 uint8_t * strings_handle_int::GetString(std::string str) {
