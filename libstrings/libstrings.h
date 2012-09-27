@@ -124,8 +124,9 @@ LIBSTRINGS uint32_t OpenStringsFile(strings_handle * sh, const uint8_t * path);
 
 /* Closes the file associated with the given handle. No changes are written
    until the handle is closed. Closing the handle also frees any memory 
-   allocated during its use. */
-LIBSTRINGS void CloseStringsFile(strings_handle sh);
+   allocated during its use. If save is true and the file has been edited,
+   the changes will be written to disk, otherwise they will be discarded. */
+LIBSTRINGS void CloseStringsFile(strings_handle sh, const bool save);
 
 
 /*------------------------------
@@ -150,16 +151,13 @@ LIBSTRINGS uint32_t GetString(strings_handle sh, const uint32_t stringId, uint8_
 LIBSTRINGS uint32_t SetStrings(strings_handle sh, const string_data * strings, const size_t numStrings);
 
 /* Adds the given string to the file. */
-LIBSTRINGS uint32_t AddString(strings_handle sh, const uint32_t stringId, const uint8_t * string);
+LIBSTRINGS uint32_t AddString(strings_handle sh, const uint32_t stringId, const uint8_t * str);
 
 /* Replaces the string corresponding to the given ID with the given string. */
 LIBSTRINGS uint32_t EditString(strings_handle sh, const uint32_t stringId, const uint8_t * newString);
 
 /* Removes the string corresponding to the given ID. */
 LIBSTRINGS uint32_t RemoveString(strings_handle sh, const uint32_t stringId);
-
-/* Removes any strings in the file that exist as raw data but do not have IDs assigned to them. */
-LIBSTRINGS uint32_t RemoveUnreferencedStrings(strings_handle sh);
 
 #ifdef __cplusplus
 }

@@ -77,7 +77,7 @@ int main() {
 	}
 
 	id = dataArr[500].id;
-
+	
 	out << "TESTING GetString(...)" << endl;
 	ret = GetString(sh, id, &str);
 	if (ret != LIBSTRINGS_OK)
@@ -86,7 +86,7 @@ int main() {
 		out << '\t' << "GetString(...) successful!"  << endl;
 		out << '\t' << "String fetched: " << str << endl;
 	}
-
+	
 	out << "TESTING GetUnreferencedStrings(...)" << endl;
 	ret = GetUnreferencedStrings(sh, &stringArr, &arrSize);
 	if (ret != LIBSTRINGS_OK)
@@ -99,7 +99,7 @@ int main() {
 	}
 
 	out << "TESTING CloseStringsFile(...)" << endl;
-	CloseStringsFile(sh);
+	CloseStringsFile(sh, true);
 
 	out.close();
 	return 0;

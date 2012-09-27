@@ -37,12 +37,12 @@ namespace fs = boost::filesystem;
 
 strings_handle_int::strings_handle_int(string filePath) :
 	path(filePath),
+	isEdited(false),
 	extStringDataArr(NULL),
 	extStringArr(NULL),
 	extString(NULL),
 	extStringDataArrSize(0),
-	extStringArrSize(0), 
-	Header() {
+	extStringArrSize(0) {
 
 	//Check extension.
 	const string ext = fs::path(filePath).extension().string();
@@ -53,103 +53,167 @@ strings_handle_int::strings_handle_int(string filePath) :
 	else
 		throw error(LIBSTRINGS_ERROR_INVALID_ARGS, "File passed does not have a valid extension.");
 
+	//Set transcoding up.
+	trans.SetEncoding(1252);
+
+	//If the file already exists, parse it.
 	if (fs::exists(path)) {
 		ifstream in(path.c_str(), ios::binary);
 		if (!in.good())
 			throw error(LIBSTRINGS_ERROR_FILE_READ_FAIL, filePath);
 
-		//Read directory count into Header::count.
-		in.read((char*)&count, sizeof(uint32_t) / sizeof(char));
+		/*The data for each string is stored in two separate places.
+		The directory holds all the IDs and offsets, and the data block 
+		holds all the strings at their offsets.
+		Loop through the directory and for each entry, record the ID, 
+		look up the string using the offset and store that.
+		Quickest to read whole file into memory, parse it from there
+		then free that memory. Jumping around inside a file stream is
+		a bit slower. */
+		uint8_t * fileContent;
+		uint32_t fileSize;
 
-		//Read string data size into Header::dataSize.
-		in.read((char*)&dataSize, sizeof(uint32_t) / sizeof(char));
+		//Get the file's length.
+		in.seekg(0, ios::end);
+		fileSize = in.tellg();
 
-		//Now allocate memory to Header::directory and Header::data with the obtained sizes.
+		//Allocate memory.
 		try {
-			directory = new DirectoryEntry[count];
-			data = new uint8_t[dataSize];
-		} catch (bad_alloc /*&e*/) {
+			fileContent = new uint8_t[fileSize];
+		} catch (bad_alloc &e) {
 			throw error(LIBSTRINGS_ERROR_NO_MEM);
 		}
 
-		//Read directory into Header::directory.
-		in.read((char*)directory, sizeof(DirectoryEntry) * count / sizeof(char));
+		//Read whole file into memory.
+		in.seekg(0, ios::beg);
+		in.read((char*)fileContent, fileSize);
 
-		//Read string data into Header::data.
-		in.read((char*)data, sizeof(uint8_t) * dataSize / sizeof(char));
+		in.close();
+
+		//Get number of directory entries.
+		uint32_t dirCount = *reinterpret_cast<uint32_t*>(fileContent);
+
+		uint32_t pos = 0;
+		uint32_t startOfData = sizeof(uint32_t) * 2 * (dirCount + 1);
+		boost::unordered_set<uint32_t> offsets;
+		while (pos < startOfData) {
+			string str;
+			uint32_t id = *reinterpret_cast<uint32_t*>(fileContent + pos);
+			uint32_t offset = *reinterpret_cast<uint32_t*>(fileContent + pos + sizeof(uint32_t));
+			uint32_t strPos = startOfData + offset;
+			if (!isDotStrings)
+				strPos += sizeof(uint32_t);
+
+			//Find position of null pointer.
+			char * nptr = strchr((char*)(fileContent + strPos), '\0');
+			if (nptr == NULL)
+				throw error(LIBSTRINGS_ERROR_FILE_READ_FAIL, filePath);
+
+			str = string((char*)(fileContent + strPos), nptr - (char*)(fileContent + strPos));
+
+			data.insert(pair<uint32_t, string>(id, str));
+			offsets.emplace(offset);
+
+			pos += 2 * sizeof(uint32_t);
+		}
+
+		//Now before we delete the contents, let's look for unreferenced strings.
+		pos = startOfData;
+		boost::unordered_set<uint32_t>::iterator endIt = offsets.end();
+		while (pos < fileSize) {
+			stringstream out;
+			string str;
+
+			if (isDotStrings)
+				out << fileContent + pos;
+			else
+				out << fileContent + pos + sizeof(uint32_t);
+			str = out.str();
+
+			if (offsets.find(pos - startOfData) == endIt)
+				unrefStrings.emplace(str);
+
+			pos += str.length() + 1;
+			if (!isDotStrings)
+				pos += sizeof(uint32_t);
+		}
+
+		delete [] fileContent;
 	}
-
-	trans.SetEncoding(1252);
 }
 
 strings_handle_int::~strings_handle_int() {
-	//Save everything in memory to the file. This could be done easier in C...
-	ofstream out((path + ".new").c_str(), ios::binary | ios::trunc);
+	if (isEdited) {
+		//Save everything in memory to the file.
+		string directory;
+		string strData;
+		boost::unordered_map<string, uint32_t> hashmap;
 
-	out << string((char*)&count, sizeof(uint32_t)) 
-		<< string((char*)&dataSize, sizeof(uint32_t))
-		<< string((char*)directory, sizeof(DirectoryEntry) * count)
-		<< string((char*)data, sizeof(uint8_t) * dataSize);
+		for (map<uint32_t, string>::iterator it=data.begin(), endIt=data.end(); it != endIt; ++it) {
 
-	out.close();
+			/* Search for this pair's string in the hashset.
+			   If present, use the offset in the hashmap for the directory entry's offset,
+			   and don't add the string again.
+			   Otherwise, add as normal. */
 
-	delete [] directory;
-	delete [] data;
+			boost::unordered_map<string, uint32_t>::iterator searchIt = hashmap.find(it->second);
+			if (searchIt != hashmap.end()) {
+				//Write directory data to its buffer.
+				directory	+= string((char*)&(it->first), sizeof(uint32_t))
+							+  string((char*)&(searchIt->second), sizeof(uint32_t));
+			} else {
+				uint32_t len = strData.length();
 
-	delete [] extString;
+				//Write directory data to its buffer.
+				directory	+= string((char*)&(it->first), sizeof(uint32_t))
+							+  string((char*)&len, sizeof(uint32_t));
+		
+				//Write string data to its buffer, and increment the dataSize.
+				string str = it->second + '\0';
+				if (!isDotStrings) {
+					uint32_t size = str.length();
+					str = string((char*)&size, sizeof(uint32_t)) + str;
+				}
+				strData += str;
 
-	for (size_t i=0; i < extStringDataArrSize; i++)
-		delete [] extStringDataArr[i].data;
-	delete [] extStringDataArr;
+				//Add to hashset to prevent it being written again.
+				hashmap.insert(pair<string, uint32_t>(it->second, len));
+			}
 
-	for (size_t i=0; i < extStringArrSize; i++)
-		delete [] extStringArr[i];
-	delete [] extStringArr;
-}
-
-uint8_t * strings_handle_int::GetStringFromData(size_t offset) {
-	//Strings are null terminated, so scan through until that is reached. Alternatively, use stringstream's << operator to do that for us.
-	ostringstream out;
-	if (isDotStrings)
-		out << data + offset;
-	else
-		out << data + offset + sizeof(uint32_t);
-
-	return ToUint8_tString(trans.EncToUtf8(out.str()));
-}
-
-void strings_handle_int::FindUnreferencedStrings() {
-	/*This is a bit tricky.
-	The directory has a list of offsets for strings with IDs.
-	There may be unreferenced strings scattered between these strings.
-	Strings are all null-terminated.
-	Directory entries are not ordered, so offsets are not ordered, so if
-	we just moved along the offsets we might miss unreferenced strings.
-
-	Instead, read through the directory, putting all offsets into a hashset.
-	Then read through the data block. Each time a new string is encountered,
-	search the hashset for its offset. If not found, add it to a vector for
-	outputting later.
-	*/
-
-	boost::unordered_set<uint32_t> offsets;
-	for (size_t i=0; i < count; i++) {
-		offsets.emplace(directory[i].offset);
-	}
-
-	uint32_t offset = 0;
-	while (offset < dataSize) {
-		if (offsets.find(offset) == offsets.end())
-			unrecOffsets.emplace(offset);
-
-		//If !isDotStrings, the length data can be used to calculate the next offset.
-		if (!isDotStrings)
-			offset += *(uint32_t*)(data + offset) + sizeof(uint32_t);  //First 4 bytes of data at the offset is the string length.
-		else {
-			//Otherwise, we can either count until one after the next null, or we can use stringstream.
-			ostringstream stringHolder;
-			stringHolder << data + offset;
-			offset += stringHolder.str().length() + 1;  //+1 is for the null character.
+			
 		}
+		uint32_t count = data.size();
+		uint32_t dataSize = strData.length();
+
+		//Now write out everything.
+		ofstream out((path + ".new").c_str(), ios::binary | ios::trunc);
+		if (!out.good())
+			throw error(LIBSTRINGS_ERROR_FILE_READ_FAIL, path);
+		out.write((char*)&count, sizeof(uint32_t));
+		out.write((char*)&dataSize, sizeof(uint32_t));
+		out.write((char*)directory.data(), directory.length());
+		out.write((char*)strData.data(), strData.length());
+
+		out.close();
 	}
+
+	if (extString != NULL)
+		delete [] extString;
+
+	if (extStringDataArr != NULL) {
+		for (size_t i=0; i < extStringDataArrSize; i++)
+			delete [] extStringDataArr[i].data;
+		delete [] extStringDataArr;
+	}
+
+	if (extStringArr != NULL) {
+		for (size_t i=0; i < extStringArrSize; i++)
+			delete [] extStringArr[i];
+		delete [] extStringArr;
+	}
+}
+
+uint8_t * strings_handle_int::GetString(std::string str) {
+	str = trans.EncToUtf8(str);
+	return ToUint8_tString(str);
 }

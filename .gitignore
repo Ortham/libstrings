@@ -47,3 +47,5 @@ Thumbs.db
 externals/
 out/
 bin/
+ipch/
+libstrings-tester.txt

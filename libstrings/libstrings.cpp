@@ -92,8 +92,10 @@ LIBSTRINGS uint32_t GetLastErrorDetails(uint8_t ** details) {
 		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.").code();
 
 	//Free memory if in use.
-	delete [] extErrorString;
-	extErrorString = NULL;
+	if (extErrorString != NULL) {
+		delete [] extErrorString;
+		extErrorString = NULL;
+	}
 
 	try {
 		extErrorString = ToUint8_tString(lastException.what());
@@ -106,8 +108,10 @@ LIBSTRINGS uint32_t GetLastErrorDetails(uint8_t ** details) {
 }
 
 LIBSTRINGS void CleanUpErrorDetails() {
-	delete [] extErrorString;
-	extErrorString = NULL;
+	if (extErrorString != NULL) {
+		delete [] extErrorString;
+		extErrorString = NULL;
+	}
 }
 
 /*----------------------------------
@@ -139,9 +143,13 @@ LIBSTRINGS uint32_t OpenStringsFile(strings_handle * sh, const uint8_t * path) {
 
 /* Closes the file associated with the given handle. No changes are written
    until the handle is closed. Closing the handle also frees any memory 
-   allocated during its use. */
-LIBSTRINGS void CloseStringsFile(strings_handle sh) {
-	delete sh;
+   allocated during its use. If save is true and the file has been edited,
+   the changes will be written to disk, otherwise they will be discarded. */
+LIBSTRINGS void CloseStringsFile(strings_handle sh, const bool save) {
+	if (!save)
+		sh->isEdited = false;
+	if (sh != NULL)
+		delete sh;
 }
 
 
@@ -163,13 +171,22 @@ LIBSTRINGS uint32_t GetStrings(strings_handle sh, string_data ** strings, size_t
 		sh->extStringDataArrSize = 0;
 	}
 
-	sh->extStringDataArrSize = sh->count;
+	//Init values.
+	*strings = NULL;
+	*numStrings = NULL;
+
+	if (sh->data.empty())
+		return LIBSTRINGS_OK;
+
+	sh->extStringDataArrSize = sh->data.size();
 
 	try {
 		sh->extStringDataArr = new string_data[sh->extStringDataArrSize];
-		for (size_t i=0; i < sh->count; i++) {
-			sh->extStringDataArr[i].id = sh->directory[i].id;
-			sh->extStringDataArr[i].data = sh->GetStringFromData(sh->directory[i].offset);
+		size_t i=0;
+		for (map<uint32_t, string>::iterator it=sh->data.begin(), endIt=sh->data.end(); it != endIt; ++it) {
+			sh->extStringDataArr[i].id = it->first;
+			sh->extStringDataArr[i].data = sh->GetString(it->second);
+			i++;
 		}
 	} catch (bad_alloc& /*e*/) {
 		return error(LIBSTRINGS_ERROR_NO_MEM).code();
@@ -185,6 +202,8 @@ LIBSTRINGS uint32_t GetStrings(strings_handle sh, string_data ** strings, size_t
 
 /* Gets an array of any strings in the file that are not assigned IDs. */
 LIBSTRINGS uint32_t GetUnreferencedStrings(strings_handle sh, uint8_t *** strings, size_t * numStrings) {
+	if (sh == NULL || strings == NULL || numStrings == NULL) //Check for valid args.
+		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.").code();
 
 	//Free memory if in use.
 	if (sh->extStringArr != NULL) {
@@ -195,18 +214,21 @@ LIBSTRINGS uint32_t GetUnreferencedStrings(strings_handle sh, uint8_t *** string
 		sh->extStringArrSize = 0;
 	}
 
-	//Find the offsets for all unreferenced strings.
-	if (sh->unrecOffsets.empty())
-		sh->FindUnreferencedStrings();
+	//Init values.
+	*strings = NULL;
+	*numStrings = NULL;
+
+	if (sh->unrefStrings.empty())
+		return LIBSTRINGS_OK;
 
 	//Allocate memory.
-	sh->extStringArrSize = sh->unrecOffsets.size();
+	sh->extStringArrSize = sh->unrefStrings.size();
 	try {
 		sh->extStringArr = new uint8_t*[sh->extStringArrSize];
 		//Now loop through the offsets, getting the string for each.
 		size_t i=0;
-		for (boost::unordered_set<uint32_t>::iterator it=sh->unrecOffsets.begin(), endIt=sh->unrecOffsets.end(); it != endIt; ++it) {
-			sh->extStringArr[i] = sh->GetStringFromData(*it);
+		for (boost::unordered_set<string>::iterator it=sh->unrefStrings.begin(), endIt=sh->unrefStrings.end(); it != endIt; ++it) {
+			sh->extStringArr[i] = sh->GetString(*it);
 			i++;
 		}
 	} catch (bad_alloc& /*e*/) {
@@ -227,19 +249,19 @@ LIBSTRINGS uint32_t GetString(strings_handle sh, const uint32_t stringId, uint8_
 		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.").code();
 
 	//Free memory in use.
-	delete [] sh->extString;
-
-	//Find offset corresponding to given ID.
-	uint32_t offset;
-	for (size_t i=0; i < sh->count; i++) {
-		if (sh->directory[i].id == stringId) {
-			offset = sh->directory[i].offset;
-			break;
-		}
+	if (sh->extString != NULL) {
+		delete [] sh->extString;
+		sh->extString = NULL;
 	}
 
+	//Init value.
+	*string = NULL;
+
+	//Find string.
 	try {
-		sh->extString = sh->GetStringFromData(offset);
+		map<uint32_t, std::string>::iterator it = sh->data.find(stringId);
+		if (it != sh->data.end())
+			sh->extString = sh->GetString(it->second);
 	} catch (bad_alloc /*&e*/) {
 		return error(LIBSTRINGS_ERROR_NO_MEM).code();
 	} catch (error& e) {
@@ -258,25 +280,81 @@ LIBSTRINGS uint32_t GetString(strings_handle sh, const uint32_t stringId, uint8_
 
 /* Replaces all existing strings in the file with the given strings. */
 LIBSTRINGS uint32_t SetStrings(strings_handle sh, const string_data * strings, const size_t numStrings) {
+	if (sh == NULL || strings == NULL) //Check for valid args.
+		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.").code();
 
+	map<uint32_t, string> newMap;
+
+	try {
+		for (size_t i=0; i < numStrings; i++) {
+			string str = sh->trans.Utf8ToEnc(string(reinterpret_cast<const char *>(strings[i].data)));
+			if (!newMap.insert(pair<uint32_t, string>(strings[i].id, str)).second)
+				return error(LIBSTRINGS_ERROR_INVALID_ARGS, string("The ID given for the string \"") + str + string("\" already exists.")).code();
+		}
+	} catch (error& e) {
+		return e.code();
+	}
+
+	sh->data = newMap;
+	sh->isEdited = true;
+
+	return LIBSTRINGS_OK;
 }
 
 /* Adds the given string to the file. */
-LIBSTRINGS uint32_t AddString(strings_handle sh, const uint32_t stringId, const uint8_t * string) {
+LIBSTRINGS uint32_t AddString(strings_handle sh, const uint32_t stringId, const uint8_t * str) {
+	if (sh == NULL || str == NULL) //Check for valid args.
+		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.").code();
 
+	//Convert to Windows-1252.
+	string strString;
+	try {
+		strString = sh->trans.Utf8ToEnc(string(reinterpret_cast<const char *>(str)));
+	} catch (error& e) {
+		return e.code();
+	}
+
+	if (!sh->data.insert(pair<uint32_t, string>(stringId, strString)).second)
+		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "The given ID already exists.").code();
+	
+	sh->isEdited = true;
+	return LIBSTRINGS_OK;
 }
 
 /* Replaces the string corresponding to the given ID with the given string. */
 LIBSTRINGS uint32_t EditString(strings_handle sh, const uint32_t stringId, const uint8_t * newString) {
+	if (sh == NULL || newString == NULL) //Check for valid args.
+		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.").code();
 
+	//Convert to Windows-1252.
+	string strString;
+	try {
+		strString = sh->trans.Utf8ToEnc(string(reinterpret_cast<const char *>(newString)));
+	} catch (error& e) {
+		return e.code();
+	}
+
+	map<uint32_t, string>::iterator it = sh->data.find(stringId);
+	if (it == sh->data.end())
+		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "The given ID does not exist.").code();
+	
+	it->second = strString;
+	sh->isEdited = true;
+
+	return LIBSTRINGS_OK;
 }
 
 /* Removes the string corresponding to the given ID. */
 LIBSTRINGS uint32_t RemoveString(strings_handle sh, const uint32_t stringId) {
+	if (sh == NULL) //Check for valid args.
+		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.").code();
 
-}
+	map<uint32_t, string>::iterator it = sh->data.find(stringId);
+	if (it == sh->data.end())
+		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "The given ID does not exist.").code();
 
-/* Removes any strings in the file that exist as raw data but do not have IDs assigned to them. */
-LIBSTRINGS uint32_t RemoveUnreferencedStrings(strings_handle sh) {
+	sh->data.erase(it);
+	sh->isEdited = true;
 
+	return LIBSTRINGS_OK;
 }
