@@ -42,12 +42,14 @@ int main() {
 
 	strings_handle sh;
 	uint8_t * path = reinterpret_cast<uint8_t *>("C:/Program Files (x86)/Steam/steamapps/common/skyrim/Data/Strings/Skyrim_English.STRINGS");
+	uint8_t * testMessage = reinterpret_cast<uint8_t *>("This is a test message.");
 	uint32_t ret;
 	string_data * dataArr;
-	size_t arrSize;
+	size_t dataArrSize;
 	uint8_t * str;
 	uint32_t id;
 	uint8_t ** stringArr;
+	size_t stringArrSize;
 
 	std::ofstream out("libstrings-tester.txt");
 	if (!out.good()){
@@ -65,13 +67,13 @@ int main() {
 		out << '\t' << "OpenStringsFile(...) successful!" << endl;
 
 	out << "TESTING GetStrings(...)" << endl;
-	ret = GetStrings(sh, &dataArr, &arrSize);
+	ret = GetStrings(sh, &dataArr, &dataArrSize);
 	if (ret != LIBSTRINGS_OK)
 		out << '\t' << "GetStrings(...) failed! Return code: " << ret << endl;
 	else {
-		out << '\t' << "GetStrings(...) successful! Number of strings: " << arrSize << endl;
+		out << '\t' << "GetStrings(...) successful! Number of strings: " << dataArrSize << endl;
 		out << '\t' << "ID" << '\t' << "String" << endl;
-		for (size_t i=0; i < arrSize; i++) {
+		for (size_t i=0; i < dataArrSize; i++) {
 			out << dataArr[i].id << '\t' << dataArr[i].data << endl;
 		}
 	}
@@ -88,13 +90,80 @@ int main() {
 	}
 	
 	out << "TESTING GetUnreferencedStrings(...)" << endl;
-	ret = GetUnreferencedStrings(sh, &stringArr, &arrSize);
+	ret = GetUnreferencedStrings(sh, &stringArr, &stringArrSize);
 	if (ret != LIBSTRINGS_OK)
 		out << '\t' << "GetUnreferencedStrings(...) failed! Return code: " << ret << endl;
 	else {
-		out << '\t' << "GetUnreferencedStrings(...) successful! Number of strings: " << arrSize << endl;
-		for (size_t i=0; i < arrSize; i++) {
+		out << '\t' << "GetUnreferencedStrings(...) successful! Number of strings: " << stringArrSize << endl;
+		for (size_t i=0; i < stringArrSize; i++) {
 			out << '\t' << stringArr[i] << endl;
+		}
+	}
+
+	out << "TESTING SetString(...)" << endl;
+	ret = EditString(sh, id, testMessage);
+	if (ret != LIBSTRINGS_OK)
+		out << '\t' << "SetString(...) failed! Return code: " << ret << endl;
+	else {
+		out << '\t' << "SetString(...) successful!"  << endl;
+	}
+
+	out << "TESTING GetString(...)" << endl;
+	ret = GetString(sh, id, &str);
+	if (ret != LIBSTRINGS_OK)
+		out << '\t' << "GetString(...) failed! Return code: " << ret << endl;
+	else {
+		out << '\t' << "GetString(...) successful!"  << endl;
+		out << '\t' << "String fetched: " << str << endl;
+	}
+
+	out << "TESTING AddString(...)" << endl;
+	ret = AddString(sh, 500000, testMessage);
+	if (ret != LIBSTRINGS_OK)
+		out << '\t' << "AddString(...) failed! Return code: " << ret << endl;
+	else {
+		out << '\t' << "AddString(...) successful!"  << endl;
+	}
+
+	out << "TESTING RemoveString(...)" << endl;
+	ret = RemoveString(sh, 500000);
+	if (ret != LIBSTRINGS_OK)
+		out << '\t' << "RemoveString(...) failed! Return code: " << ret << endl;
+	else {
+		out << '\t' << "RemoveString(...) successful!"  << endl;
+	}
+
+	out << "TESTING GetString(...)" << endl;
+	ret = GetString(sh, 500000, &str);
+	if (ret != LIBSTRINGS_OK) {
+		out << '\t' << "GetString(...) failed! Return code: " << ret << endl;
+		ret = GetLastErrorDetails(&str);
+		if (ret != LIBSTRINGS_OK)
+			out << '\t' << "Failed to get error message." << endl;
+		else
+			out << '\t' << "Error message: " << str << endl;
+	} else {
+		out << '\t' << "GetString(...) successful!"  << endl;
+		out << '\t' << "String fetched: " << str << endl;
+	}
+
+	out << "TESTING SetStrings(...)" << endl;
+	ret = SetStrings(sh, dataArr, dataArrSize);
+	if (ret != LIBSTRINGS_OK)
+		out << '\t' << "SetStrings(...) failed! Return code: " << ret << endl;
+	else {
+		out << '\t' << "SetStrings(...) successful!" << endl;
+	}
+
+	out << "TESTING GetStrings(...)" << endl;
+	ret = GetStrings(sh, &dataArr, &dataArrSize);
+	if (ret != LIBSTRINGS_OK)
+		out << '\t' << "GetStrings(...) failed! Return code: " << ret << endl;
+	else {
+		out << '\t' << "GetStrings(...) successful! Number of strings: " << dataArrSize << endl;
+		out << '\t' << "ID" << '\t' << "String" << endl;
+		for (size_t i=0; i < dataArrSize; i++) {
+			out << dataArr[i].id << '\t' << dataArr[i].data << endl;
 		}
 	}
 

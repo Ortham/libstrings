@@ -262,6 +262,8 @@ LIBSTRINGS uint32_t GetString(strings_handle sh, const uint32_t stringId, uint8_
 		boost::unordered_map<uint32_t, std::string>::iterator it = sh->data.find(stringId);
 		if (it != sh->data.end())
 			sh->extString = sh->GetString(it->second);
+		else
+			return error(LIBSTRINGS_ERROR_INVALID_ARGS, "The given ID does not exist.").code();
 	} catch (bad_alloc /*&e*/) {
 		return error(LIBSTRINGS_ERROR_NO_MEM).code();
 	} catch (error& e) {
