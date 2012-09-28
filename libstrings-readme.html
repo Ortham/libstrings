@@ -182,7 +182,7 @@
 </ul>
 
 <h3 id="functions-lifecycle">Lifecycle Management Functions</h3>
-<dfn id="CreateGameHandle">OpenStringsFile</dfn> - Opens a STRINGS, ILSTRINGS or DLSTRINGS file, outputting a handle for the strings it contains. If the file doesn't exist then it will be created. You can create multiple handles, including for the same file, but remember that libstrings is not thread safe.
+<dfn id="CreateGameHandle">OpenStringsFile</dfn> - Opens a STRINGS, ILSTRINGS or DLSTRINGS file, outputting a handle for the strings it contains. If the file doesn't exist then a handle for a new file will be created. You can create multiple handles, including for the same file, but remember that libstrings is not thread safe.
 <code class="box">uint32_t <a href="#OpenStringsFile">CreateGameHandle</a> (strings_handle * sh, const uint8_t * path);</code>
 <ul>
 	<li><var>sh</var> - A pointer to the handle created by the function.
@@ -269,10 +269,10 @@
 <p>More complex usage examples are to follow.
 
 <h2 id="contact">Contact</h2>
-<p>libstrings is maintained by the Community Mod Utilities project, which currently consists of soley WrinklyNinja (me!). Project members can be contacted by Private Message on Bethesda Softworks' <a href="http://forums.bethsoft.com">official forums</a>.
+<p>libstrings is developed by <a href="https://github.com/terrible-with-names">Terrible With Names</a>. Team members may be available for contact on GitHub, or through Private Messages on Bethesda Softworks' <a href="http://forums.bethsoft.com">official forums</a>.
 
 <h2 id="credits">Credits</h2>
-<p>libstrings is written by WrinklyNinja. libstrings is written in C/C++ and makes use of the <a href="http://utfcpp.sourceforge.net/">UTF8-CPP</a> library, some of the <a href="http://www.boost.org/">Boost</a> libraries and Dirk Jagdmann's implementation of Dave Koelle's <a href="http://www.davekoelle.com/alphanum.html">Alphanum Algorithm</a>.
+<p>libstrings is written by WrinklyNinja. libstrings is written in C/C++ and makes use of the <a href="http://utfcpp.sourceforge.net/">UTF8-CPP</a> library and some of the <a href="http://www.boost.org/">Boost</a> libraries.
 
 <h2 id="license">License</h2>
 <p>libstrings is distributed under the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public License v3.0</a>. For the full text of the license, see the included <q>LICENSE</q> file.

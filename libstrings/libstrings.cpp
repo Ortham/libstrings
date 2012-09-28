@@ -117,8 +117,8 @@ LIBSTRINGS void CleanUpErrorDetails() {
 ----------------------------------*/
 
 /* Opens a STRINGS, ILSTRINGS or DLSTRINGS file at path, returning a handle 
-   sh. If the strings file doesn't exist then it will be created. The file 
-   extension is used to determine the string data format used. */
+   sh. If the strings file doesn't exist then a handle for a new file will be
+   created. */
 LIBSTRINGS uint32_t OpenStringsFile(strings_handle * sh, const uint8_t * path) {
 	if (sh == NULL || path == NULL) //Check for valid args.
 		return error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.").code();

@@ -75,7 +75,7 @@ int main() {
 		out << '\t' << "GetStrings(...) successful! Number of strings: " << dataArrSize << endl;
 		out << '\t' << "ID" << '\t' << "String" << endl;
 		for (size_t i=0; i < dataArrSize; i++) {
-			out << dataArr[i].id << '\t' << dataArr[i].data << endl;
+			out << '\t' << dataArr[i].id << '\t' << dataArr[i].data << endl;
 		}
 	}
 
@@ -164,7 +164,7 @@ int main() {
 		out << '\t' << "GetStrings(...) successful! Number of strings: " << dataArrSize << endl;
 		out << '\t' << "ID" << '\t' << "String" << endl;
 		for (size_t i=0; i < dataArrSize; i++) {
-			out << dataArr[i].id << '\t' << dataArr[i].data << endl;
+			out << '\t' << dataArr[i].id << '\t' << dataArr[i].data << endl;
 		}
 	}
 
@@ -176,7 +176,7 @@ int main() {
 		out << '\t' << "SaveStrings(...) successful!" << endl;
 	}
 
-	out << "TESTING SaveStringsFile(...)" << endl;
+	out << "TESTING CloseStringsFile(...)" << endl;
 	CloseStringsFile(sh);
 
 	out.close();
