@@ -180,7 +180,7 @@ LIBSTRINGS uint32_t GetStrings(strings_handle sh, string_data ** strings, size_t
 
 	//Init values.
 	*strings = NULL;
-	*numStrings = NULL;
+	*numStrings = 0;
 
 	if (sh->data.empty())
 		return LIBSTRINGS_OK;
@@ -223,7 +223,7 @@ LIBSTRINGS uint32_t GetUnreferencedStrings(strings_handle sh, uint8_t *** string
 
 	//Init values.
 	*strings = NULL;
-	*numStrings = NULL;
+	*numStrings = 0;
 
 	if (sh->unrefStrings.empty())
 		return LIBSTRINGS_OK;
