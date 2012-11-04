@@ -10,22 +10,23 @@ set (LIBSTR_SRC "${CMAKE_SOURCE_DIR}/src")
 set (LIBSTR_LIBS boost_filesystem boost_system)
 set (LIBSTR_LIB_SRC "${LIBSTR_SRC}/exception.cpp" "${LIBSTR_SRC}/format.cpp" "${LIBSTR_SRC}/helpers.cpp" "${LIBSTR_SRC}/libstrings.cpp")
 
-set (CMAKE_CXX_FLAGS "-static")
+# Set compiler flags.
+set (CMAKE_C_FLAGS  "-m${LIBSTR_ARCH}")
+set (CMAKE_CXX_FLAGS "-m${LIBSTR_ARCH}")
 
 # Include source and library directories.
 include_directories     ("${CMAKE_SOURCE_DIR}/externals/boost" "${CMAKE_SOURCE_DIR}/externals/utf8" ${LIBSTR_SRC})
-# Depending on platform and architecture, and whether cross-compiling, the
-# libs are stored in different places.
+# Depending on platform and architecture, the libs are stored in different places.
 IF (DEFINED LIBSTRINGS_CC_LINUX_WINDOWS)
-    link_directories    ("${CMAKE_SOURCE_DIR}/externals/boost/stage-mingw-32/lib")
+    link_directories    ("${CMAKE_SOURCE_DIR}/externals/boost/stage-mingw-${LIBSTR_ARCH}/lib")
 ELSE (DEFINED LIBSTRINGS_CC_LINUX_WINDOWS)
-    link_directories    ("${CMAKE_SOURCE_DIR}/externals/boost/stage-32/lib")
+    link_directories    ("${CMAKE_SOURCE_DIR}/externals/boost/stage-${LIBSTR_ARCH}/lib")
 ENDIF (DEFINED LIBSTRINGS_CC_LINUX_WINDOWS)
 
 # Build libstrings library.
-add_library             (strings ${LIBSTR_LIB_SRC})
+add_library         (strings ${LIBSTR_LINK} ${LIBSTR_LIB_SRC})
 target_link_libraries   (strings ${LIBSTR_LIBS})
 
 # Build libstrings tester.
 add_executable          (libstrings-tester ${LIBSTR_SRC}/tester.cpp)
-target_link_libraries   (libstrings-tester strings ${LIBSTR_LIBS})
+target_link_libraries   (libstrings-tester strings)

@@ -14,9 +14,8 @@ Build Instructions
 Note: These build instructions are a work in progress, as I have
 recently switched from Windows 7 to Ubuntu. Sorry about that. Currently
 my knowledge is limited to compiling for Linux and cross-compiling for
-Windows. I'm not sure whether I'm building 32 bit or 64 bit libraries/
-binaries, but I do know that I've only got things set up for static
-libraries so far.
+Windows. The whole point of using CMake is that you should be able to
+generate MSVC project files from it though.
 
 Note: All paths are given relative to the top directory of the
 libstrings source (ie. where this README is).
@@ -62,7 +61,7 @@ Open a Terminal window and navigate to the root of the libstrings source.
     ./b2 toolset=gcc link=static variant=release address-model=32 --with-filesystem --with-locale --with-regex --with-program_options --with-system --stagedir=stage-32
     mkdir ../../build
     cd ../../build
-    cmake ..
+    cmake .. -DLIBSTR_ARCH=32 -DLIBSTR_LINK=STATIC
     make
 
 
@@ -74,10 +73,17 @@ For cross-compiling to Windows:
     ./b2 toolset=gcc-4.6.3 target-os=windows link=static variant=release address-model=32 --with-filesystem --with-locale --with-regex --with-program_options --with-system --stagedir=stage-mingw-32
     mkdir ../../build
     cd ../../build
-    cmake .. -DCMAKE_TOOLCHAIN_FILE=toolchain
+    cmake .. -DLIBSTR_ARCH=32 -DLIBSTR_LINK=STATIC -DCMAKE_TOOLCHAIN_FILE=toolchain
     make
 
-If both native and cross-compiling, you'll need to delete the 'folder'
-otherwise CMake will get confused and only build one of them (it doesn't
-seem to overwrite all the necessary config files when it generates the
-build system the second time).
+If both native and cross-compiling, you'll need to delete the 'build'
+folder otherwise CMake will get confused and only build one of them (it
+doesn't seem to overwrite all the necessary config files when it
+generates the build system the second time).
+
+To compile a shared library, swap -DLIBSTR_LINK=STATIC with
+-DLIBSTR_LINK=SHARED
+
+To compile a 64 bit library, replace all instances of "32" in the above
+commands with "64". Also replace all instances of "i586-mingw32msvc"
+in the echo command with "x86_64-w64-mingw32":
