@@ -11,8 +11,11 @@ set (LIBSTR_LIBS boost_filesystem boost_system)
 set (LIBSTR_LIB_SRC "${LIBSTR_SRC}/exception.cpp" "${LIBSTR_SRC}/format.cpp" "${LIBSTR_SRC}/helpers.cpp" "${LIBSTR_SRC}/libstrings.cpp")
 
 # Set compiler flags.
-set (CMAKE_C_FLAGS  "-m${LIBSTR_ARCH}")
-set (CMAKE_CXX_FLAGS "-m${LIBSTR_ARCH}")
+set (CMAKE_C_FLAGS  "-m${LIBSTR_ARCH}  -static -static-libstdc++ -static-libgcc")
+set (CMAKE_CXX_FLAGS "-m${LIBSTR_ARCH} -static -static-libstdc++ -static-libgcc")
+set (CMAKE_EXE_LINKER_FLAGS "-static-libstdc++ -static-libgcc")
+set (CMAKE_SHARED_LINKER_FLAGS "-static-libstdc++ -static-libgcc")
+set (CMAKE_MODULE_LINKER_FLAGS "-static-libstdc++ -static-libgcc")
 
 # Include source and library directories.
 include_directories     ("${CMAKE_SOURCE_DIR}/externals/boost" "${CMAKE_SOURCE_DIR}/externals/utf8" ${LIBSTR_SRC})
