@@ -26,7 +26,6 @@
 #include <iostream>
 #include <stdint.h>
 #include <fstream>
-#include <clocale>
 
 using namespace std;
 
