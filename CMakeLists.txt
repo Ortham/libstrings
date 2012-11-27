@@ -32,6 +32,7 @@ ENDIF ()
 # Settings when compiling on Windows.
 IF (CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
     set (LIBSTR_LIBS libboost_filesystem-vc110-mt-1_52 libboost_system-vc110-mt-1_52)
+ENDIF ()
 
 # Settings when compiling and cross-compiling on Linux.
 IF (CMAKE_HOST_SYSTEM_NAME MATCHES "Linux")
