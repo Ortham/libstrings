@@ -38,7 +38,7 @@ using namespace libstrings;
 ------------------------------*/
 
 const uint32_t LIBSTRINGS_VERSION_MAJOR = 1;
-const uint32_t LIBSTRINGS_VERSION_MINOR = 0;
+const uint32_t LIBSTRINGS_VERSION_MINOR = 1;
 const uint32_t LIBSTRINGS_VERSION_PATCH = 0;
 
 uint8_t * extErrorString = NULL;
@@ -65,7 +65,7 @@ const uint32_t LIBSTRINGS_RETURN_MAX                = LIBSTRINGS_ERROR_BAD_STRIN
 /* Returns whether this version of libstrings is compatible with the given
    version of libstrings. */
 LIBSTRINGS bool IsCompatibleVersion(const uint32_t versionMajor, const uint32_t versionMinor, const uint32_t versionPatch) {
-    if (versionMajor == 1 && versionMinor == 0 && versionPatch == 0)
+    if (versionMajor == 1 && versionMinor == 1 && versionPatch == 0)
         return true;
     else
         return false;
@@ -119,7 +119,7 @@ LIBSTRINGS void CleanUpErrorDetails() {
 /* Opens a STRINGS, ILSTRINGS or DLSTRINGS file at path, returning a handle
    sh. If the strings file doesn't exist then a handle for a new file will be
    created. */
-LIBSTRINGS uint32_t OpenStringsFile(strings_handle * sh, const uint8_t * path) {
+LIBSTRINGS uint32_t OpenStringsFile(strings_handle * sh, const uint8_t * path, const uint32_t fallbackEncoding) {
     if (sh == NULL || path == NULL) //Check for valid args.
         return error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.").code();
 
@@ -131,7 +131,7 @@ LIBSTRINGS uint32_t OpenStringsFile(strings_handle * sh, const uint8_t * path) {
 
     //Create handle.
     try {
-        *sh = new strings_handle_int(string(reinterpret_cast<const char *>(path)));
+        *sh = new strings_handle_int(string(reinterpret_cast<const char *>(path)), fallbackEncoding);
     } catch (error& e) {
         return e.code();
     }
@@ -192,7 +192,7 @@ LIBSTRINGS uint32_t GetStrings(strings_handle sh, string_data ** strings, size_t
         size_t i=0;
         for (boost::unordered_map<uint32_t, string>::iterator it=sh->data.begin(), endIt=sh->data.end(); it != endIt; ++it) {
             sh->extStringDataArr[i].id = it->first;
-            sh->extStringDataArr[i].data = sh->GetString(it->second);
+            sh->extStringDataArr[i].data = ToUint8_tString(it->second);
             i++;
         }
     } catch (bad_alloc& /*e*/) {
@@ -235,7 +235,7 @@ LIBSTRINGS uint32_t GetUnreferencedStrings(strings_handle sh, uint8_t *** string
         //Now loop through the offsets, getting the string for each.
         size_t i=0;
         for (boost::unordered_set<string>::iterator it=sh->unrefStrings.begin(), endIt=sh->unrefStrings.end(); it != endIt; ++it) {
-            sh->extStringArr[i] = sh->GetString(*it);
+            sh->extStringArr[i] = ToUint8_tString(*it);
             i++;
         }
     } catch (bad_alloc& /*e*/) {
@@ -268,7 +268,7 @@ LIBSTRINGS uint32_t GetString(strings_handle sh, const uint32_t stringId, uint8_
     try {
         boost::unordered_map<uint32_t, std::string>::iterator it = sh->data.find(stringId);
         if (it != sh->data.end())
-            sh->extString = sh->GetString(it->second);
+            sh->extString = ToUint8_tString(it->second);
         else
             return error(LIBSTRINGS_ERROR_INVALID_ARGS, "The given ID does not exist.").code();
     } catch (bad_alloc /*&e*/) {
@@ -296,7 +296,7 @@ LIBSTRINGS uint32_t SetStrings(strings_handle sh, const string_data * strings, c
 
     try {
         for (size_t i=0; i < numStrings; i++) {
-            string str = sh->trans.Utf8ToEnc(string(reinterpret_cast<const char *>(strings[i].data)));
+            string str = string(reinterpret_cast<const char *>(strings[i].data));
             if (!newMap.insert(pair<uint32_t, string>(strings[i].id, str)).second)
                 return error(LIBSTRINGS_ERROR_INVALID_ARGS, string("The ID given for the string \"") + str + string("\" already exists.")).code();
         }
@@ -317,7 +317,7 @@ LIBSTRINGS uint32_t AddString(strings_handle sh, const uint32_t stringId, const 
     //Convert to Windows-1252.
     string strString;
     try {
-        strString = sh->trans.Utf8ToEnc(string(reinterpret_cast<const char *>(str)));
+        strString = string(reinterpret_cast<const char *>(str));
     } catch (error& e) {
         return e.code();
     }
@@ -336,7 +336,7 @@ LIBSTRINGS uint32_t EditString(strings_handle sh, const uint32_t stringId, const
     //Convert to Windows-1252.
     string strString;
     try {
-        strString = sh->trans.Utf8ToEnc(string(reinterpret_cast<const char *>(newString)));
+        strString = string(reinterpret_cast<const char *>(newString));
     } catch (error& e) {
         return e.code();
     }

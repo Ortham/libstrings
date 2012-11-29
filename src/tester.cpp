@@ -31,8 +31,8 @@ using namespace std;
 
 int main() {
     strings_handle sh;
-    const uint8_t * path = reinterpret_cast<const uint8_t *>("/media/oliver/6CF05918F058EA3A/Program Files (x86)/Steam/steamapps/common/skyrim/Data/Strings/Skyrim_English.STRINGS");
-    const uint8_t * newPath = reinterpret_cast<const uint8_t *>("/media/oliver/6CF05918F058EA3A/Program Files (x86)/Steam/steamapps/common/skyrim/Data/Strings/Skyrim_English-new.STRINGS");
+    const uint8_t * path = reinterpret_cast<const uint8_t *>("/media/oliver/6CF05918F058EA3A/Users/Oliver/Downloads/Strings/Skyrim_RUSSIAN.STRINGS");
+    const uint8_t * newPath = reinterpret_cast<const uint8_t *>("/media/oliver/6CF05918F058EA3A/Users/Oliver/Downloads/Strings/Skyrim_Japanese.STRINGS");
     const uint8_t * testMessage = reinterpret_cast<const uint8_t *>("This is a test message.");
     uint32_t ret;
     string_data * dataArr;
@@ -51,7 +51,7 @@ int main() {
     out << "Using path: " << path << endl;
 
     out << "TESTING OpenStringsFile(...)" << endl;
-    ret = OpenStringsFile(&sh, path);
+    ret = OpenStringsFile(&sh, path, 1251);
     if (ret != LIBSTRINGS_OK)
         out << '\t' << "OpenStringsFile(...) failed! Return code: " << ret << endl;
     else
@@ -69,7 +69,7 @@ int main() {
         }
     }
 
-    id = dataArr[500].id;
+ /*   id = dataArr[500].id;
 
     out << "TESTING GetString(...)" << endl;
     ret = GetString(sh, id, &str);
@@ -165,7 +165,7 @@ int main() {
     else {
         out << '\t' << "SaveStrings(...) successful!" << endl;
     }
-
+*/
     out << "TESTING CloseStringsFile(...)" << endl;
     CloseStringsFile(sh);
 
