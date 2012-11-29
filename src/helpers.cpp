@@ -181,7 +181,7 @@ namespace libstrings {
         commonMap.emplace('\x82', 0x201A);
         commonMap.emplace('\x84', 0x201E);
         commonMap.emplace('\x85', 0x2026);
-        commonMap.emplace('\x86', 0x2026);
+        commonMap.emplace('\x86', 0x2020);
         commonMap.emplace('\x87', 0x2021);
         commonMap.emplace('\x89', 0x2030);
         commonMap.emplace('\x8B', 0x2039);
@@ -211,6 +211,7 @@ namespace libstrings {
         commonMap.emplace('\xBB', 0x00BB);
 
         //Fill 1251 -> UTF-8 map.
+        //0x98 is unused in Windows-1251.
         map1251toUTF8 = commonMap;  //Fill with common mapped characters.
         map1251toUTF8.emplace('\x80', 0x0402);
         map1251toUTF8.emplace('\x81', 0x0403);
@@ -222,7 +223,6 @@ namespace libstrings {
         map1251toUTF8.emplace('\x8E', 0x040B);
         map1251toUTF8.emplace('\x8F', 0x040F);
         map1251toUTF8.emplace('\x90', 0x0452);
-        map1251toUTF8.emplace('\x98', 0x0020);
         map1251toUTF8.emplace('\x9A', 0x0459);
         map1251toUTF8.emplace('\x9C', 0x045A);
         map1251toUTF8.emplace('\x9D', 0x045C);
@@ -311,6 +311,7 @@ namespace libstrings {
         map1251toUTF8.emplace('\xFF', 0x044F);
 
         //Now fill 1252 -> UTF-8 map.
+        //0x81, 0x8D, 0x8F, 0x90, 0x9D are unused in Windows-1251.
         map1252toUTF8 = commonMap;  //Fill with common mapped characters.
         map1252toUTF8.emplace('\x80', 0x20AC);
         map1252toUTF8.emplace('\x83', 0x0192);

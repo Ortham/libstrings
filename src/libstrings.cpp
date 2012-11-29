@@ -122,6 +122,8 @@ LIBSTRINGS void CleanUpErrorDetails() {
 LIBSTRINGS uint32_t OpenStringsFile(strings_handle * sh, const uint8_t * path, const uint32_t fallbackEncoding) {
     if (sh == NULL || path == NULL) //Check for valid args.
         return error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.").code();
+    else if (fallbackEncoding != 1251 && fallbackEncoding != 1252)
+        return error(LIBSTRINGS_ERROR_INVALID_ARGS, "Invalid encoding passed.").code();
 
     //Set the locale to get encoding conversions working correctly.
     setlocale(LC_CTYPE, "");
