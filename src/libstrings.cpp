@@ -39,7 +39,7 @@ using namespace libstrings;
 
 const uint32_t LIBSTRINGS_VERSION_MAJOR = 1;
 const uint32_t LIBSTRINGS_VERSION_MINOR = 1;
-const uint32_t LIBSTRINGS_VERSION_PATCH = 0;
+const uint32_t LIBSTRINGS_VERSION_PATCH = 1;
 
 uint8_t * extErrorString = NULL;
 
