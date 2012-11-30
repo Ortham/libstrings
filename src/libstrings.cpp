@@ -65,7 +65,7 @@ const uint32_t LIBSTRINGS_RETURN_MAX                = LIBSTRINGS_ERROR_BAD_STRIN
 /* Returns whether this version of libstrings is compatible with the given
    version of libstrings. */
 LIBSTRINGS bool IsCompatibleVersion(const uint32_t versionMajor, const uint32_t versionMinor, const uint32_t versionPatch) {
-    if (versionMajor == 1 && versionMinor == 1 && versionPatch == 0)
+    if (versionMajor == 1 && versionMinor == 1 && versionPatch <= 1)
         return true;
     else
         return false;
