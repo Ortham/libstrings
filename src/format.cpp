@@ -90,7 +90,7 @@ strings_handle_int::strings_handle_int(string path, int fallbackEncoding) :
         //Get number of directory entries.
         uint32_t dirCount = *reinterpret_cast<uint32_t*>(fileContent);
 
-        uint32_t pos = 0;
+        uint32_t pos = sizeof(uint32_t) * 2;
         uint32_t startOfData = sizeof(uint32_t) * 2 * (dirCount + 1);
         boost::unordered_set<uint32_t> offsets;
         while (pos < startOfData) {
@@ -110,7 +110,7 @@ strings_handle_int::strings_handle_int(string path, int fallbackEncoding) :
             str = trans.ToUTF8(string((char*)(fileContent + strPos), nptr - (char*)(fileContent + strPos)), fallbackEncoding);
 
             data.insert(pair<uint32_t, string>(id, str));
-            offsets.emplace(offset);
+            offsets.insert(offset);
 
             pos += 2 * sizeof(uint32_t);
         }
