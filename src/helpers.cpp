@@ -48,7 +48,7 @@ namespace libstrings {
     ////////////////////////////////
 
     Transcoder::Transcoder() {
-        //Fill common character maps (1251/1252 -> UTF-8).
+        //Fill common character maps (1250/1251/1252 -> UTF-8).
         boost::unordered_map<char, uint32_t> commonMap;
         commonMap.emplace('\x00', 0x0000);
         commonMap.emplace('\x01', 0x0001);
@@ -209,6 +209,102 @@ namespace libstrings {
         commonMap.emplace('\xB6', 0x00B6);
         commonMap.emplace('\xB7', 0x00B7);
         commonMap.emplace('\xBB', 0x00BB);
+
+        //Fill 1250 -> UTF-8 map.
+        //0x81, 0x83, 0x88, 0x90, 0x98 are unused in Windows-1250.
+        map1250toUTF8 = commonMap;  //Fill with common mapped characters.
+        map1250toUTF8.emplace('\x80', 0x20AC);
+        map1250toUTF8.emplace('\x8A', 0x0160);
+        map1250toUTF8.emplace('\x8C', 0x015A);
+        map1250toUTF8.emplace('\x8D', 0x0164);
+        map1250toUTF8.emplace('\x8E', 0x017D);
+        map1250toUTF8.emplace('\x8F', 0x0179);
+        map1250toUTF8.emplace('\x9A', 0x0161);
+        map1250toUTF8.emplace('\x9C', 0x015B);
+        map1250toUTF8.emplace('\x9D', 0x0165);
+        map1250toUTF8.emplace('\x9E', 0x017E);
+        map1250toUTF8.emplace('\x9F', 0x017A);
+        map1250toUTF8.emplace('\xA1', 0x02C7);
+        map1250toUTF8.emplace('\xA2', 0x02D8);
+        map1250toUTF8.emplace('\xA3', 0x0141);
+        map1250toUTF8.emplace('\xA5', 0x0104);
+        map1250toUTF8.emplace('\xA8', 0x00A8);
+        map1250toUTF8.emplace('\xAA', 0x015E);
+        map1250toUTF8.emplace('\xAF', 0x017B);
+        map1250toUTF8.emplace('\xB2', 0x02DB);
+        map1250toUTF8.emplace('\xB3', 0x0142);
+        map1250toUTF8.emplace('\xB4', 0x00B4);
+        map1250toUTF8.emplace('\xB8', 0x00B8);
+        map1250toUTF8.emplace('\xB9', 0x0105);
+        map1250toUTF8.emplace('\xBA', 0x015F);
+        map1250toUTF8.emplace('\xBC', 0x013D);
+        map1250toUTF8.emplace('\xBD', 0x02DD);
+        map1250toUTF8.emplace('\xBE', 0x013E);
+        map1250toUTF8.emplace('\xBF', 0x017C);
+        map1250toUTF8.emplace('\xC0', 0x0154);
+        map1250toUTF8.emplace('\xC1', 0x00C1);
+        map1250toUTF8.emplace('\xC2', 0x00C2);
+        map1250toUTF8.emplace('\xC3', 0x0102);
+        map1250toUTF8.emplace('\xC4', 0x00C4);
+        map1250toUTF8.emplace('\xC5', 0x0139);
+        map1250toUTF8.emplace('\xC6', 0x0106);
+        map1250toUTF8.emplace('\xC7', 0x00C7);
+        map1250toUTF8.emplace('\xC8', 0x010C);
+        map1250toUTF8.emplace('\xC9', 0x00C9);
+        map1250toUTF8.emplace('\xCA', 0x0118);
+        map1250toUTF8.emplace('\xCB', 0x00CB);
+        map1250toUTF8.emplace('\xCC', 0x011A);
+        map1250toUTF8.emplace('\xCD', 0x00CD);
+        map1250toUTF8.emplace('\xCE', 0x00CE);
+        map1250toUTF8.emplace('\xCF', 0x010E);
+        map1250toUTF8.emplace('\xD0', 0x0110);
+        map1250toUTF8.emplace('\xD1', 0x0143);
+        map1250toUTF8.emplace('\xD2', 0x0147);
+        map1250toUTF8.emplace('\xD3', 0x00D3);
+        map1250toUTF8.emplace('\xD4', 0x00D4);
+        map1250toUTF8.emplace('\xD5', 0x0150);
+        map1250toUTF8.emplace('\xD6', 0x00D6);
+        map1250toUTF8.emplace('\xD7', 0x00D7);
+        map1250toUTF8.emplace('\xD8', 0x0158);
+        map1250toUTF8.emplace('\xD9', 0x016E);
+        map1250toUTF8.emplace('\xDA', 0x00DA);
+        map1250toUTF8.emplace('\xDB', 0x0170);
+        map1250toUTF8.emplace('\xDC', 0x00DC);
+        map1250toUTF8.emplace('\xDD', 0x00DD);
+        map1250toUTF8.emplace('\xDE', 0x0162);
+        map1250toUTF8.emplace('\xDF', 0x00DF);
+        map1250toUTF8.emplace('\xE0', 0x0155);
+        map1250toUTF8.emplace('\xE1', 0x00E1);
+        map1250toUTF8.emplace('\xE2', 0x00E2);
+        map1250toUTF8.emplace('\xE3', 0x0103);
+        map1250toUTF8.emplace('\xE4', 0x00E4);
+        map1250toUTF8.emplace('\xE5', 0x013A);
+        map1250toUTF8.emplace('\xE6', 0x0107);
+        map1250toUTF8.emplace('\xE7', 0x00E7);
+        map1250toUTF8.emplace('\xE8', 0x010D);
+        map1250toUTF8.emplace('\xE9', 0x00E9);
+        map1250toUTF8.emplace('\xEA', 0x0119);
+        map1250toUTF8.emplace('\xEB', 0x00EB);
+        map1250toUTF8.emplace('\xEC', 0x011B);
+        map1250toUTF8.emplace('\xED', 0x00ED);
+        map1250toUTF8.emplace('\xEE', 0x00EE);
+        map1250toUTF8.emplace('\xEF', 0x010F);
+        map1250toUTF8.emplace('\xF0', 0x0111);
+        map1250toUTF8.emplace('\xF1', 0x0144);
+        map1250toUTF8.emplace('\xF2', 0x0148);
+        map1250toUTF8.emplace('\xF3', 0x00F3);
+        map1250toUTF8.emplace('\xF4', 0x00F4);
+        map1250toUTF8.emplace('\xF5', 0x0151);
+        map1250toUTF8.emplace('\xF6', 0x00F6);
+        map1250toUTF8.emplace('\xF7', 0x00F7);
+        map1250toUTF8.emplace('\xF8', 0x0159);
+        map1250toUTF8.emplace('\xF9', 0x016F);
+        map1250toUTF8.emplace('\xFA', 0x00FA);
+        map1250toUTF8.emplace('\xFB', 0x0171);
+        map1250toUTF8.emplace('\xFC', 0x00FC);
+        map1250toUTF8.emplace('\xFD', 0x00FD);
+        map1250toUTF8.emplace('\xFE', 0x0163);
+        map1250toUTF8.emplace('\xFF', 0x02D9);
 
         //Fill 1251 -> UTF-8 map.
         //0x98 is unused in Windows-1251.
@@ -415,7 +511,9 @@ namespace libstrings {
 
         //Not valid UTF-8, so select the appropriate code point map.
         boost::unordered_map<char, uint32_t> * mapToUse;
-        if (inEncoding == 1251)
+        if (inEncoding == 1250)
+            mapToUse = &map1250toUTF8;
+        else if (inEncoding == 1251)
             mapToUse = &map1251toUTF8;
         else if (inEncoding == 1252)
             mapToUse = &map1252toUTF8;

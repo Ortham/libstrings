@@ -37,6 +37,7 @@ namespace libstrings {
         // UTF-8.
         class Transcoder {
         private:
+            boost::unordered_map<char, uint32_t> map1250toUTF8; //Windows-1250, UTF-8.
             boost::unordered_map<char, uint32_t> map1251toUTF8; //Windows-1251, UTF-8.
             boost::unordered_map<char, uint32_t> map1252toUTF8; //Windows-1252, UTF-8.
         public:
