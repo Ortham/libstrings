@@ -25,25 +25,15 @@
 #define LIBSTRINGS_HELPERS_H
 
 #include <string>
-#include <boost/unordered_map.hpp>
-#include <boost/filesystem.hpp>
+#include <stdint.h>
 
 namespace libstrings {
         // std::string to null-terminated uint8_t string converter.
-        uint8_t * ToUint8_tString(std::string str);
+        uint8_t * ToUint8_tString(const std::string& str);
 
-        // converts between encodings.
-        // need to be able to convert Windows-1251 -> UTF-8 and Windows-1252 ->
-        // UTF-8.
-        class Transcoder {
-        private:
-            boost::unordered_map<char, uint32_t> map1250toUTF8; //Windows-1250, UTF-8.
-            boost::unordered_map<char, uint32_t> map1251toUTF8; //Windows-1251, UTF-8.
-            boost::unordered_map<char, uint32_t> map1252toUTF8; //Windows-1252, UTF-8.
-        public:
-            Transcoder();
-            std::string ToUTF8(const std::string inString, int inEncoding);
-        };
+        // Encoding conversions. 'encoding' can be of the form "Windows-*".
+        std::string ToUTF8(const std::string& str, const std::string& encoding);
+        std::string FromUTF8(const std::string& str, const std::string& encoding);
 }
 
 #endif

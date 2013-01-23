@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <string>
 #include <boost/unordered_set.hpp>
+#include <boost/unordered_map.hpp>
 #include <map>
 
 /* See here for format details: http://www.uesp.net/wiki/Tes5Mod:String_Table_File_Format
@@ -37,7 +38,7 @@
    Store strings in UTF-8. */
 struct strings_handle_int {
 public:
-    strings_handle_int(std::string path, int fallbackEncoding);
+    strings_handle_int(std::string path, const std::string& fallbackEncoding);
     ~strings_handle_int();
 
     //File data.
@@ -57,9 +58,6 @@ public:
 
     //Save file data to given path.
     void Save(std::string path);
-private:
-    //Transcoder for encoding conversions.
-    libstrings::Transcoder trans;
 };
 
 #endif

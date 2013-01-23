@@ -117,7 +117,7 @@ LIBSTRINGS void CleanUpErrorDetails();
 /* Opens a STRINGS, ILSTRINGS or DLSTRINGS file at path, returning a handle
    sh. If the strings file doesn't exist then a handle for a new file will be
    created. */
-LIBSTRINGS uint32_t OpenStringsFile(strings_handle * sh, const uint8_t * path, const uint32_t fallbackEncoding);
+LIBSTRINGS uint32_t OpenStringsFile(strings_handle * sh, const uint8_t * path, const char * fallbackEncoding);
 
 /* Saves the strings associated with the given handle to the given path. */
 LIBSTRINGS uint32_t SaveStringsFile(strings_handle sh, const uint8_t * path);

@@ -51,7 +51,7 @@ int main() {
     out << "Using path: " << path << endl;
 
     out << "TESTING OpenStringsFile(...)" << endl;
-    ret = OpenStringsFile(&sh, path, 1251);
+    ret = OpenStringsFile(&sh, path, "Windows-1252");
     if (ret != LIBSTRINGS_OK)
         out << '\t' << "OpenStringsFile(...) failed! Return code: " << ret << endl;
     else

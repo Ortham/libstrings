@@ -36,7 +36,7 @@ using namespace libstrings;
 
 namespace fs = boost::filesystem;
 
-strings_handle_int::strings_handle_int(string path, int fallbackEncoding) :
+strings_handle_int::strings_handle_int(string path, const string& fallbackEncoding) :
     extStringDataArr(NULL),
     extStringArr(NULL),
     extString(NULL),
@@ -107,7 +107,7 @@ strings_handle_int::strings_handle_int(string path, int fallbackEncoding) :
                 throw error(LIBSTRINGS_ERROR_FILE_READ_FAIL, path);
 
             //Now set string, transcoding if necessary.
-            str = trans.ToUTF8(string((char*)(fileContent + strPos), nptr - (char*)(fileContent + strPos)), fallbackEncoding);
+            str = ToUTF8(string((char*)(fileContent + strPos), nptr - (char*)(fileContent + strPos)), fallbackEncoding);
 
             data.insert(pair<uint32_t, string>(id, str));
             offsets.insert(offset);
@@ -129,7 +129,7 @@ strings_handle_int::strings_handle_int(string path, int fallbackEncoding) :
             str = out.str();
 
             if (offsets.find(pos - startOfData) == endIt)
-                unrefStrings.emplace(trans.ToUTF8(str, fallbackEncoding));
+                unrefStrings.emplace(ToUTF8(str, fallbackEncoding));
 
             pos += str.length() + 1;
             if (!isDotStrings)
