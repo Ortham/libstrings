@@ -11,7 +11,7 @@
 cmake_minimum_required (VERSION 2.8.9)
 project (libstrings)
 
-set (PROJECT_SRC "${CMAKE_SOURCE_DIR}/src/exception.cpp" "${CMAKE_SOURCE_DIR}/src/format.cpp" "${CMAKE_SOURCE_DIR}/src/helpers.cpp" "${CMAKE_SOURCE_DIR}/src/libstrings.cpp")
+set (PROJECT_SRC "${CMAKE_SOURCE_DIR}/src/format.cpp" "${CMAKE_SOURCE_DIR}/src/helpers.cpp" "${CMAKE_SOURCE_DIR}/src/libstrings.cpp")
 
 # Include source and library directories.
 include_directories ("${PROJECT_LIBS_DIR}/boost" "${PROJECT_LIBS_DIR}/utf8" "${CMAKE_SOURCE_DIR}/src")

@@ -21,19 +21,25 @@
         <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __LIBSTRINGS_HELPERS_H__
-#define __LIBSTRINGS_HELPERS_H__
+#ifndef __LIBSTRINGS_ERROR_H__
+#define __LIBSTRINGS_ERROR_H__
 
+#include <exception>
 #include <string>
-#include <stdint.h>
 
 namespace libstrings {
-        // std::string to null-terminated uint8_t string converter.
-        uint8_t * ToUint8_tString(const std::string& str);
 
-        // Encoding conversions. 'encoding' can be of the form "Windows-*".
-        std::string ToUTF8(const std::string& str, const std::string& encoding);
-        std::string FromUTF8(const std::string& str, const std::string& encoding);
+    class error : public std::exception {
+    public:
+        error(const unsigned int code, const std::string& what) : _code(code), _what(what) {}
+        ~error() throw() {};
+
+        unsigned int code() const { return _code; }
+        const char * what() const throw() { return _what.c_str(); }
+    private:
+        std::string _what;
+        unsigned int _code;
+    };
 }
 
 #endif

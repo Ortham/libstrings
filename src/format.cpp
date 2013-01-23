@@ -23,7 +23,7 @@
 
 #include "format.h"
 #include "libstrings.h"
-#include "exception.h"
+#include "error.h"
 #include "helpers.h"
 #include <cstdio>
 #include <fstream>
@@ -77,8 +77,8 @@ strings_handle_int::strings_handle_int(string path, const string& fallbackEncodi
         //Allocate memory.
         try {
             fileContent = new uint8_t[fileSize];
-        } catch (bad_alloc &e) {
-            throw error(LIBSTRINGS_ERROR_NO_MEM);
+        } catch (bad_alloc& e) {
+            throw error(LIBSTRINGS_ERROR_NO_MEM, e.what());
         }
 
         //Read whole file into memory.
@@ -104,7 +104,7 @@ strings_handle_int::strings_handle_int(string path, const string& fallbackEncodi
             //Find position of null pointer.
             char * nptr = strchr((char*)(fileContent + strPos), '\0');
             if (nptr == NULL)
-                throw error(LIBSTRINGS_ERROR_FILE_READ_FAIL, path);
+                throw error(LIBSTRINGS_ERROR_FILE_READ_FAIL, "Could not read contents of \"" + path + "\".");
 
             //Now set string, transcoding if necessary.
             str = ToUTF8(string((char*)(fileContent + strPos), nptr - (char*)(fileContent + strPos)), fallbackEncoding);
@@ -214,7 +214,7 @@ void strings_handle_int::Save(std::string path) {
     //Now write out everything.
     ofstream out(path.c_str(), ios::binary | ios::trunc);
     if (!out.good())
-        throw error(LIBSTRINGS_ERROR_FILE_WRITE_FAIL, path);
+        throw error(LIBSTRINGS_ERROR_FILE_WRITE_FAIL, "Could not write to \"" + path + "\".");
     out.write((char*)&count, sizeof(uint32_t));
     out.write((char*)&dataSize, sizeof(uint32_t));
     out.write((char*)directory.data(), directory.length());

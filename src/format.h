@@ -21,8 +21,8 @@
         <http://www.gnu.org/licenses/>.
 */
 
-#ifndef LIBSTRINGS_FORMAT_H
-#define LIBSTRINGS_FORMAT_H
+#ifndef __LIBSTRINGS_FORMAT_H__
+#define __LIBSTRINGS_FORMAT_H__
 
 #include "libstrings.h"
 #include "helpers.h"

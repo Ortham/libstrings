@@ -21,8 +21,8 @@
         <http://www.gnu.org/licenses/>.
 */
 
-#ifndef LIBSTRINGS_H
-#define LIBSTRINGS_H
+#ifndef __LIBSTRINGS_H__
+#define __LIBSTRINGS_H__
 
 #include <stdint.h>
 #include <stddef.h>

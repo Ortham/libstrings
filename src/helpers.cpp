@@ -23,7 +23,7 @@
 
 #include "helpers.h"
 #include "libstrings.h"
-#include "exception.h"
+#include "error.h"
 #include <cstring>
 #include <boost/locale.hpp>
 
