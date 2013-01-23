@@ -38,14 +38,14 @@ using namespace libstrings;
    Global variables
 ------------------------------*/
 
-const uint32_t LIBSTRINGS_VERSION_MAJOR = 1;
-const uint32_t LIBSTRINGS_VERSION_MINOR = 1;
-const uint32_t LIBSTRINGS_VERSION_PATCH = 1;
+const unsigned int LIBSTRINGS_VERSION_MAJOR = 1;
+const unsigned int LIBSTRINGS_VERSION_MINOR = 1;
+const unsigned int LIBSTRINGS_VERSION_PATCH = 1;
 
-uint8_t * extErrorString = NULL;
+const char * extErrorString = NULL;
 
 unsigned int c_error(const error& e) {
-    extErrorString = ToUint8_tString(e.what());
+    extErrorString = ToNewCString(e.what());
     return e.code();
 }
 
@@ -59,13 +59,13 @@ unsigned int c_error(const unsigned int code, const std::string& what) {
 ------------------------------*/
 
 /* The following are the possible codes that the library can return. */
-const uint32_t LIBSTRINGS_OK                        = 0;
-const uint32_t LIBSTRINGS_ERROR_INVALID_ARGS        = 1;
-const uint32_t LIBSTRINGS_ERROR_NO_MEM              = 2;
-const uint32_t LIBSTRINGS_ERROR_FILE_READ_FAIL      = 3;
-const uint32_t LIBSTRINGS_ERROR_FILE_WRITE_FAIL     = 4;
-const uint32_t LIBSTRINGS_ERROR_BAD_STRING          = 5;
-const uint32_t LIBSTRINGS_RETURN_MAX                = LIBSTRINGS_ERROR_BAD_STRING;
+const unsigned int LIBSTRINGS_OK                        = 0;
+const unsigned int LIBSTRINGS_ERROR_INVALID_ARGS        = 1;
+const unsigned int LIBSTRINGS_ERROR_NO_MEM              = 2;
+const unsigned int LIBSTRINGS_ERROR_FILE_READ_FAIL      = 3;
+const unsigned int LIBSTRINGS_ERROR_FILE_WRITE_FAIL     = 4;
+const unsigned int LIBSTRINGS_ERROR_BAD_STRING          = 5;
+const unsigned int LIBSTRINGS_RETURN_MAX                = LIBSTRINGS_ERROR_BAD_STRING;
 
 
 /*------------------------------
@@ -74,14 +74,14 @@ const uint32_t LIBSTRINGS_RETURN_MAX                = LIBSTRINGS_ERROR_BAD_STRIN
 
 /* Returns whether this version of libstrings is compatible with the given
    version of libstrings. */
-LIBSTRINGS bool IsCompatibleVersion(const uint32_t versionMajor, const uint32_t versionMinor, const uint32_t versionPatch) {
+LIBSTRINGS bool IsCompatibleVersion(const unsigned int versionMajor, const unsigned int versionMinor, const unsigned int versionPatch) {
     if (versionMajor == 1 && versionMinor == 1 && versionPatch <= 1)
         return true;
     else
         return false;
 }
 
-LIBSTRINGS void GetVersionNums(uint32_t * versionMajor, uint32_t * versionMinor, uint32_t * versionPatch) {
+LIBSTRINGS void GetVersionNums(unsigned int * const versionMajor, unsigned int * const versionMinor, unsigned int * const versionPatch) {
     *versionMajor = LIBSTRINGS_VERSION_MAJOR;
     *versionMinor = LIBSTRINGS_VERSION_MINOR;
     *versionPatch = LIBSTRINGS_VERSION_PATCH;
@@ -95,7 +95,7 @@ LIBSTRINGS void GetVersionNums(uint32_t * versionMajor, uint32_t * versionMinor,
 /* Outputs a string giving the a message containing the details of the
    last error or warning encountered by a function called for the given
    game handle. */
-LIBSTRINGS uint32_t GetLastErrorDetails(uint8_t ** details) {
+LIBSTRINGS unsigned int GetLastErrorDetails(const char ** const details) {
     if (details == NULL)
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -118,7 +118,7 @@ LIBSTRINGS void CleanUpErrorDetails() {
 /* Opens a STRINGS, ILSTRINGS or DLSTRINGS file at path, returning a handle
    sh. If the strings file doesn't exist then a handle for a new file will be
    created. */
-LIBSTRINGS uint32_t OpenStringsFile(strings_handle * sh, const uint8_t * path, const char * fallbackEncoding) {
+LIBSTRINGS unsigned int OpenStringsFile(strings_handle * const sh, const char * const path, const char * const fallbackEncoding) {
     if (sh == NULL || path == NULL) //Check for valid args.
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -130,7 +130,7 @@ LIBSTRINGS uint32_t OpenStringsFile(strings_handle * sh, const uint8_t * path, c
 
     //Create handle.
     try {
-        *sh = new strings_handle_int(string(reinterpret_cast<const char *>(path)), fallbackEncoding);
+        *sh = new _strings_handle_int(path, fallbackEncoding);
     } catch (error& e) {
         return c_error(e);
     }
@@ -139,12 +139,12 @@ LIBSTRINGS uint32_t OpenStringsFile(strings_handle * sh, const uint8_t * path, c
 }
 
 /* Saves the strings associated with the given handle to the given path. */
-LIBSTRINGS uint32_t SaveStringsFile(strings_handle sh, const uint8_t * path) {
+LIBSTRINGS unsigned int SaveStringsFile(strings_handle sh, const char * const path) {
     if (sh == NULL || path == NULL)
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
     try {
-        sh->Save(string(reinterpret_cast<const char *>(path)));
+        sh->Save(path);
     } catch (error e) {
         return c_error(e);
     }
@@ -164,7 +164,7 @@ LIBSTRINGS void CloseStringsFile(strings_handle sh) {
 ------------------------------*/
 
 /* Gets an array of all strings (with assigned IDs) in the file. */
-LIBSTRINGS uint32_t GetStrings(strings_handle sh, string_data ** strings, size_t * numStrings) {
+LIBSTRINGS unsigned int GetStrings(strings_handle sh, string_data ** strings, size_t * numStrings) {
     if (sh == NULL || strings == NULL || numStrings == NULL) //Check for valid args.
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -191,7 +191,7 @@ LIBSTRINGS uint32_t GetStrings(strings_handle sh, string_data ** strings, size_t
         size_t i=0;
         for (boost::unordered_map<uint32_t, string>::iterator it=sh->data.begin(), endIt=sh->data.end(); it != endIt; ++it) {
             sh->extStringDataArr[i].id = it->first;
-            sh->extStringDataArr[i].data = ToUint8_tString(it->second);
+            sh->extStringDataArr[i].data = ToNewCString(it->second);
             i++;
         }
     } catch (bad_alloc& e) {
@@ -207,7 +207,7 @@ LIBSTRINGS uint32_t GetStrings(strings_handle sh, string_data ** strings, size_t
 }
 
 /* Gets an array of any strings in the file that are not assigned IDs. */
-LIBSTRINGS uint32_t GetUnreferencedStrings(strings_handle sh, uint8_t *** strings, size_t * numStrings) {
+LIBSTRINGS unsigned int GetUnreferencedStrings(strings_handle sh, char *** strings, size_t * numStrings) {
     if (sh == NULL || strings == NULL || numStrings == NULL) //Check for valid args.
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -230,11 +230,11 @@ LIBSTRINGS uint32_t GetUnreferencedStrings(strings_handle sh, uint8_t *** string
     //Allocate memory.
     sh->extStringArrSize = sh->unrefStrings.size();
     try {
-        sh->extStringArr = new uint8_t*[sh->extStringArrSize];
+        sh->extStringArr = new char*[sh->extStringArrSize];
         //Now loop through the offsets, getting the string for each.
         size_t i=0;
         for (boost::unordered_set<string>::iterator it=sh->unrefStrings.begin(), endIt=sh->unrefStrings.end(); it != endIt; ++it) {
-            sh->extStringArr[i] = ToUint8_tString(*it);
+            sh->extStringArr[i] = ToNewCString(*it);
             i++;
         }
     } catch (bad_alloc& e) {
@@ -250,7 +250,7 @@ LIBSTRINGS uint32_t GetUnreferencedStrings(strings_handle sh, uint8_t *** string
 }
 
 /* Gets the string with the given ID from the file. */
-LIBSTRINGS uint32_t GetString(strings_handle sh, const uint32_t stringId, uint8_t ** string) {
+LIBSTRINGS unsigned int GetString(strings_handle sh, const uint32_t stringId, char ** string) {
     if (sh == NULL || string == NULL) //Check for valid args.
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -267,7 +267,7 @@ LIBSTRINGS uint32_t GetString(strings_handle sh, const uint32_t stringId, uint8_
     try {
         boost::unordered_map<uint32_t, std::string>::iterator it = sh->data.find(stringId);
         if (it != sh->data.end())
-            sh->extString = ToUint8_tString(it->second);
+            sh->extString = ToNewCString(it->second);
         else
             return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "The given ID does not exist.");
     } catch (bad_alloc& e) {
@@ -287,7 +287,7 @@ LIBSTRINGS uint32_t GetString(strings_handle sh, const uint32_t stringId, uint8_
 ------------------------------*/
 
 /* Replaces all existing strings in the file with the given strings. */
-LIBSTRINGS uint32_t SetStrings(strings_handle sh, const string_data * strings, const size_t numStrings) {
+LIBSTRINGS unsigned int SetStrings(strings_handle sh, const string_data * strings, const size_t numStrings) {
     if (sh == NULL || strings == NULL) //Check for valid args.
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -295,9 +295,8 @@ LIBSTRINGS uint32_t SetStrings(strings_handle sh, const string_data * strings, c
 
     try {
         for (size_t i=0; i < numStrings; i++) {
-            string str = string(reinterpret_cast<const char *>(strings[i].data));
-            if (!newMap.insert(pair<uint32_t, string>(strings[i].id, str)).second)
-                return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "The ID given for the string \"" + str + "\" already exists.");
+            if (!newMap.insert(pair<uint32_t, string>(strings[i].id, strings[i].data)).second)
+                return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "The ID given for the string \"" + string(strings[i].data) + "\" already exists.");
         }
     } catch (error& e) {
         return c_error(e);
@@ -309,48 +308,32 @@ LIBSTRINGS uint32_t SetStrings(strings_handle sh, const string_data * strings, c
 }
 
 /* Adds the given string to the file. */
-LIBSTRINGS uint32_t AddString(strings_handle sh, const uint32_t stringId, const uint8_t * str) {
+LIBSTRINGS unsigned int AddString(strings_handle sh, const uint32_t stringId, const char * str) {
     if (sh == NULL || str == NULL) //Check for valid args.
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
-    //Convert to Windows-1252.
-    string strString;
-    try {
-        strString = string(reinterpret_cast<const char *>(str));
-    } catch (error& e) {
-        return c_error(e);
-    }
-
-    if (!sh->data.insert(pair<uint32_t, string>(stringId, strString)).second)
+    if (!sh->data.insert(pair<uint32_t, string>(stringId, str)).second)
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "The given ID already exists.");
 
     return LIBSTRINGS_OK;
 }
 
 /* Replaces the string corresponding to the given ID with the given string. */
-LIBSTRINGS uint32_t EditString(strings_handle sh, const uint32_t stringId, const uint8_t * newString) {
+LIBSTRINGS unsigned int EditString(strings_handle sh, const uint32_t stringId, const char * newString) {
     if (sh == NULL || newString == NULL) //Check for valid args.
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
-
-    //Convert to Windows-1252.
-    string strString;
-    try {
-        strString = string(reinterpret_cast<const char *>(newString));
-    } catch (error& e) {
-        return c_error(e);
-    }
 
     boost::unordered_map<uint32_t, string>::iterator it = sh->data.find(stringId);
     if (it == sh->data.end())
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "The given ID does not exist.");
 
-    it->second = strString;
+    it->second = newString;
 
     return LIBSTRINGS_OK;
 }
 
 /* Removes the string corresponding to the given ID. */
-LIBSTRINGS uint32_t RemoveString(strings_handle sh, const uint32_t stringId) {
+LIBSTRINGS unsigned int RemoveString(strings_handle sh, const uint32_t stringId) {
     if (sh == NULL) //Check for valid args.
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 

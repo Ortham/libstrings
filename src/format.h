@@ -36,18 +36,18 @@
    Files read may be in UTF-8, Windows-1252 or Windows-1251.
    Files written should be in UTF-8.
    Store strings in UTF-8. */
-struct strings_handle_int {
+struct _strings_handle_int {
 public:
-    strings_handle_int(std::string path, const std::string& fallbackEncoding);
-    ~strings_handle_int();
+    _strings_handle_int(const std::string& path, const std::string& fallbackEncoding);
+    ~_strings_handle_int();
 
     //File data.
     boost::unordered_map<uint32_t, std::string> data;       //Internal data storage. uint32_t is the string id and std::string is the string itself.
 
     //External data pointers.
     string_data * extStringDataArr;
-    uint8_t ** extStringArr;
-    uint8_t * extString;
+    char ** extStringArr;
+    char * extString;
 
     //External data array sizes.
     size_t extStringDataArrSize;
@@ -57,7 +57,7 @@ public:
     boost::unordered_set<std::string> unrefStrings;
 
     //Save file data to given path.
-    void Save(std::string path);
+    void Save(const std::string& path);
 };
 
 #endif

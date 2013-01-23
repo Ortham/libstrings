@@ -31,15 +31,16 @@ using namespace std;
 
 int main() {
     strings_handle sh;
-    const uint8_t * path = reinterpret_cast<const uint8_t *>("/media/oliver/6CF05918F058EA3A/Users/Oliver/Downloads/Strings/Skyrim_Japanese.STRINGS");
-    const uint8_t * newPath = reinterpret_cast<const uint8_t *>("/media/oliver/6CF05918F058EA3A/Users/Oliver/Downloads/Strings/Skyrim_Japanese.STRINGS");
-    const uint8_t * testMessage = reinterpret_cast<const uint8_t *>("This is a test message.");
-    uint32_t ret;
+    const char * path = "/media/oliver/6CF05918F058EA3A/Users/Oliver/Downloads/Strings/Skyrim_Japanese.STRINGS";
+    const char * newPath = "/media/oliver/6CF05918F058EA3A/Users/Oliver/Downloads/Strings/Skyrim_Japanese.STRINGS";
+    const char * testMessage = "This is a test message.";
+    unsigned int ret;
     string_data * dataArr;
     size_t dataArrSize;
-    uint8_t * str;
+    char * str;
+    const char * error;
     uint32_t id;
-    uint8_t ** stringArr;
+    char ** stringArr;
     size_t stringArrSize;
 
     std::ofstream out("libstrings-tester.txt");
@@ -128,11 +129,11 @@ int main() {
     ret = GetString(sh, 500000, &str);
     if (ret != LIBSTRINGS_OK) {
         out << '\t' << "GetString(...) failed! Return code: " << ret << endl;
-        ret = GetLastErrorDetails(&str);
+        ret = GetLastErrorDetails(&error);
         if (ret != LIBSTRINGS_OK)
             out << '\t' << "Failed to get error message." << endl;
         else
-            out << '\t' << "Error message: " << str << endl;
+            out << '\t' << "Error message: " << error << endl;
     } else {
         out << '\t' << "GetString(...) successful!"  << endl;
         out << '\t' << "String fetched: " << str << endl;

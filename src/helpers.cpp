@@ -32,9 +32,9 @@ using namespace std;
 namespace libstrings {
 
     // std::string to null-terminated char string converter.
-    uint8_t * ToUint8_tString(const std::string& str) {
+    char * ToNewCString(const std::string& str) {
         char * p = new char[str.length() + 1];
-        return (uint8_t*)strcpy(p, str.c_str());
+        return strcpy(p, str.c_str());
     }
 
     std::string ToUTF8(const std::string& str, const std::string& encoding) {

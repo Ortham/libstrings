@@ -36,7 +36,7 @@ using namespace libstrings;
 
 namespace fs = boost::filesystem;
 
-strings_handle_int::strings_handle_int(string path, const string& fallbackEncoding) :
+_strings_handle_int::_strings_handle_int(const string& path, const string& fallbackEncoding) :
     extStringDataArr(NULL),
     extStringArr(NULL),
     extString(NULL),
@@ -140,7 +140,7 @@ strings_handle_int::strings_handle_int(string path, const string& fallbackEncodi
     }
 }
 
-strings_handle_int::~strings_handle_int() {
+_strings_handle_int::~_strings_handle_int() {
     if (extString != NULL)
         delete [] extString;
 
@@ -158,7 +158,7 @@ strings_handle_int::~strings_handle_int() {
 }
 
 //Save file data to given path.
-void strings_handle_int::Save(std::string path) {
+void _strings_handle_int::Save(const std::string& path) {
     //Save everything in memory to the file.
     string directory;
     string strData;

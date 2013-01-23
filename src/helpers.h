@@ -29,7 +29,7 @@
 
 namespace libstrings {
         // std::string to null-terminated uint8_t string converter.
-        uint8_t * ToUint8_tString(const std::string& str);
+        char * ToNewCString(const std::string& str);
 
         // Encoding conversions. 'encoding' can be of the form "Windows-*".
         std::string ToUTF8(const std::string& str, const std::string& encoding);
