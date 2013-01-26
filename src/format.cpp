@@ -158,7 +158,7 @@ _strings_handle_int::~_strings_handle_int() {
 }
 
 //Save file data to given path.
-void _strings_handle_int::Save(const std::string& path) {
+void _strings_handle_int::Save(const std::string& path, const std::string& encoding) {
     //Save everything in memory to the file.
     string directory;
     string strData;
@@ -200,7 +200,7 @@ void _strings_handle_int::Save(const std::string& path) {
                 uint32_t size = str.length();
                 str = string((char*)&size, sizeof(uint32_t)) + str;
             }
-            strData += str;
+            strData += FromUTF8(str, encoding);
 
             //Add to hashset to prevent it being written again.
             hashmap.insert(pair<string, uint32_t>(it->second, len));

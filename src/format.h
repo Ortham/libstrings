@@ -45,7 +45,7 @@ public:
     boost::unordered_map<uint32_t, std::string> data;       //Internal data storage. uint32_t is the string id and std::string is the string itself.
 
     //External data pointers.
-    string_data * extStringDataArr;
+    st_string_data * extStringDataArr;
     char ** extStringArr;
     char * extString;
 
@@ -57,7 +57,7 @@ public:
     boost::unordered_set<std::string> unrefStrings;
 
     //Save file data to given path.
-    void Save(const std::string& path);
+    void Save(const std::string& path, const std::string& encoding);
 };
 
 #endif

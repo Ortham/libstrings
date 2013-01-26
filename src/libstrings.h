@@ -68,14 +68,14 @@ extern "C"
 ------------------------------*/
 
 /* Abstraction of strings file info structure while providing type safety. */
-typedef struct _strings_handle_int * strings_handle;
+typedef struct _strings_handle_int * st_strings_handle;
 
 /* Structure containing ID and data for a string.
    Used by Get/SetStrings to ensure IDs and string data don't get mixed up. */
 typedef struct {
         uint32_t id;
         char * data;
-} string_data;
+} st_string_data;
 
 /* Return codes */
 LIBSTRINGS extern const unsigned int LIBSTRINGS_OK;
@@ -93,10 +93,10 @@ LIBSTRINGS extern const unsigned int LIBSTRINGS_RETURN_MAX;
 
 /* Returns whether this version of libstrings is compatible with the given
    version of libstrings. */
-LIBSTRINGS bool IsCompatibleVersion (const unsigned int versionMajor, const unsigned int versionMinor, const unsigned int versionPatch);
+LIBSTRINGS bool st_is_compatible(const unsigned int versionMajor, const unsigned int versionMinor, const unsigned int versionPatch);
 
 /* Gets the version numbers for the libary. */
-LIBSTRINGS void GetVersionNums(unsigned int * const versionMajor, unsigned int * const versionMinor, unsigned int * const versionPatch);
+LIBSTRINGS void st_get_version(unsigned int * const versionMajor, unsigned int * const versionMinor, unsigned int * const versionPatch);
 
 
 /*------------------------------
@@ -104,10 +104,10 @@ LIBSTRINGS void GetVersionNums(unsigned int * const versionMajor, unsigned int *
 ------------------------------*/
 
 /* Gets a string with details about the last error returned. */
-LIBSTRINGS unsigned int GetLastErrorDetails(const char ** const details);
+LIBSTRINGS unsigned int st_get_error_message(const char ** const details);
 
 /* Frees the memory allocated to the last error details string. */
-LIBSTRINGS void CleanUpErrorDetails();
+LIBSTRINGS void st_cleanup();
 
 
 /*----------------------------------
@@ -117,14 +117,14 @@ LIBSTRINGS void CleanUpErrorDetails();
 /* Opens a STRINGS, ILSTRINGS or DLSTRINGS file at path, returning a handle
    sh. If the strings file doesn't exist then a handle for a new file will be
    created. */
-LIBSTRINGS unsigned int OpenStringsFile(strings_handle * const sh, const char * const path, const char * const fallbackEncoding);
+LIBSTRINGS unsigned int st_open(st_strings_handle * const sh, const char * const path, const char * const fallbackEncoding);
 
 /* Saves the strings associated with the given handle to the given path. */
-LIBSTRINGS unsigned int SaveStringsFile(strings_handle sh, const char * const path);
+LIBSTRINGS unsigned int st_save(st_strings_handle sh, const char * const path, const char * const encoding);
 
 /* Closes the file associated with the given handle, freeing any memory
    allocated during its use. */
-LIBSTRINGS void CloseStringsFile(strings_handle sh);
+LIBSTRINGS void st_close(st_strings_handle sh);
 
 
 /*------------------------------
@@ -132,13 +132,13 @@ LIBSTRINGS void CloseStringsFile(strings_handle sh);
 ------------------------------*/
 
 /* Gets an array of all strings (with assigned IDs) in the file. */
-LIBSTRINGS unsigned int GetStrings(strings_handle sh, string_data ** const strings, size_t * const numStrings);
+LIBSTRINGS unsigned int st_get_strings(st_strings_handle sh, st_string_data ** const strings, size_t * const numStrings);
 
 /* Gets an array of any strings in the file that are not assigned IDs. */
-LIBSTRINGS unsigned int GetUnreferencedStrings(strings_handle sh, char *** const strings, size_t * const numStrings);
+LIBSTRINGS unsigned int st_get_unref_strings(st_strings_handle sh, char *** const strings, size_t * const numStrings);
 
 /* Gets the string with the given ID from the file. */
-LIBSTRINGS unsigned int GetString(strings_handle sh, const uint32_t stringId, char ** const string);
+LIBSTRINGS unsigned int st_get_string(st_strings_handle sh, const uint32_t stringId, char ** const string);
 
 
 /*------------------------------
@@ -146,16 +146,16 @@ LIBSTRINGS unsigned int GetString(strings_handle sh, const uint32_t stringId, ch
 ------------------------------*/
 
 /* Replaces all existing strings in the file with the given strings. */
-LIBSTRINGS unsigned int SetStrings(strings_handle sh, const string_data * const strings, const size_t numStrings);
+LIBSTRINGS unsigned int st_set_strings(st_strings_handle sh, const st_string_data * const strings, const size_t numStrings);
 
 /* Adds the given string to the file. */
-LIBSTRINGS unsigned int AddString(strings_handle sh, const uint32_t stringId, const char * const str);
+LIBSTRINGS unsigned int st_add_string(st_strings_handle sh, const uint32_t stringId, const char * const str);
 
 /* Replaces the string corresponding to the given ID with the given string. */
-LIBSTRINGS unsigned int EditString(strings_handle sh, const uint32_t stringId, const char * const newString);
+LIBSTRINGS unsigned int st_replace_string(st_strings_handle sh, const uint32_t stringId, const char * const newString);
 
 /* Removes the string corresponding to the given ID. */
-LIBSTRINGS unsigned int RemoveString(strings_handle sh, const uint32_t stringId);
+LIBSTRINGS unsigned int st_remove_string(st_strings_handle sh, const uint32_t stringId);
 
 #ifdef __cplusplus
 }

@@ -32,6 +32,9 @@ namespace libstrings {
         char * ToNewCString(const std::string& str);
 
         // Encoding conversions. 'encoding' can be of the form "Windows-*".
+        // For ToUTF8, 'encoding' is actually the fallback encoding, and the
+        // function first checks if the string is already valid UTF-8 before
+        // doing anything.
         std::string ToUTF8(const std::string& str, const std::string& encoding);
         std::string FromUTF8(const std::string& str, const std::string& encoding);
 }

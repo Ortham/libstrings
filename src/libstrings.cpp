@@ -38,9 +38,9 @@ using namespace libstrings;
    Global variables
 ------------------------------*/
 
-const unsigned int LIBSTRINGS_VERSION_MAJOR = 1;
-const unsigned int LIBSTRINGS_VERSION_MINOR = 1;
-const unsigned int LIBSTRINGS_VERSION_PATCH = 1;
+const unsigned int LIBSTRINGS_VERSION_MAJOR = 2;
+const unsigned int LIBSTRINGS_VERSION_MINOR = 0;
+const unsigned int LIBSTRINGS_VERSION_PATCH = 0;
 
 const char * extErrorString = NULL;
 
@@ -74,14 +74,14 @@ const unsigned int LIBSTRINGS_RETURN_MAX                = LIBSTRINGS_ERROR_BAD_S
 
 /* Returns whether this version of libstrings is compatible with the given
    version of libstrings. */
-LIBSTRINGS bool IsCompatibleVersion(const unsigned int versionMajor, const unsigned int versionMinor, const unsigned int versionPatch) {
+LIBSTRINGS bool st_is_compatible(const unsigned int versionMajor, const unsigned int versionMinor, const unsigned int versionPatch) {
     if (versionMajor == 1 && versionMinor == 1 && versionPatch <= 1)
         return true;
     else
         return false;
 }
 
-LIBSTRINGS void GetVersionNums(unsigned int * const versionMajor, unsigned int * const versionMinor, unsigned int * const versionPatch) {
+LIBSTRINGS void st_get_version(unsigned int * const versionMajor, unsigned int * const versionMinor, unsigned int * const versionPatch) {
     *versionMajor = LIBSTRINGS_VERSION_MAJOR;
     *versionMinor = LIBSTRINGS_VERSION_MINOR;
     *versionPatch = LIBSTRINGS_VERSION_PATCH;
@@ -95,7 +95,7 @@ LIBSTRINGS void GetVersionNums(unsigned int * const versionMajor, unsigned int *
 /* Outputs a string giving the a message containing the details of the
    last error or warning encountered by a function called for the given
    game handle. */
-LIBSTRINGS unsigned int GetLastErrorDetails(const char ** const details) {
+LIBSTRINGS unsigned int st_get_error_message(const char ** const details) {
     if (details == NULL)
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -104,7 +104,7 @@ LIBSTRINGS unsigned int GetLastErrorDetails(const char ** const details) {
     return LIBSTRINGS_OK;
 }
 
-LIBSTRINGS void CleanUpErrorDetails() {
+LIBSTRINGS void st_cleanup() {
     if (extErrorString != NULL) {
         delete [] extErrorString;
         extErrorString = NULL;
@@ -118,7 +118,7 @@ LIBSTRINGS void CleanUpErrorDetails() {
 /* Opens a STRINGS, ILSTRINGS or DLSTRINGS file at path, returning a handle
    sh. If the strings file doesn't exist then a handle for a new file will be
    created. */
-LIBSTRINGS unsigned int OpenStringsFile(strings_handle * const sh, const char * const path, const char * const fallbackEncoding) {
+LIBSTRINGS unsigned int st_open(st_strings_handle * const sh, const char * const path, const char * const fallbackEncoding) {
     if (sh == NULL || path == NULL) //Check for valid args.
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -139,12 +139,12 @@ LIBSTRINGS unsigned int OpenStringsFile(strings_handle * const sh, const char * 
 }
 
 /* Saves the strings associated with the given handle to the given path. */
-LIBSTRINGS unsigned int SaveStringsFile(strings_handle sh, const char * const path) {
+LIBSTRINGS unsigned int st_save(st_strings_handle sh, const char * const path, const char * const encoding) {
     if (sh == NULL || path == NULL)
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
     try {
-        sh->Save(path);
+        sh->Save(path, encoding);
     } catch (error e) {
         return c_error(e);
     }
@@ -154,7 +154,7 @@ LIBSTRINGS unsigned int SaveStringsFile(strings_handle sh, const char * const pa
 
 /* Closes the file associated with the given handle, freeing any memory
    allocated during its use. */
-LIBSTRINGS void CloseStringsFile(strings_handle sh) {
+LIBSTRINGS void st_close(st_strings_handle sh) {
     delete sh;
 }
 
@@ -164,7 +164,7 @@ LIBSTRINGS void CloseStringsFile(strings_handle sh) {
 ------------------------------*/
 
 /* Gets an array of all strings (with assigned IDs) in the file. */
-LIBSTRINGS unsigned int GetStrings(strings_handle sh, string_data ** strings, size_t * numStrings) {
+LIBSTRINGS unsigned int st_get_strings(st_strings_handle sh, st_string_data ** strings, size_t * numStrings) {
     if (sh == NULL || strings == NULL || numStrings == NULL) //Check for valid args.
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -187,7 +187,7 @@ LIBSTRINGS unsigned int GetStrings(strings_handle sh, string_data ** strings, si
     sh->extStringDataArrSize = sh->data.size();
 
     try {
-        sh->extStringDataArr = new string_data[sh->extStringDataArrSize];
+        sh->extStringDataArr = new st_string_data[sh->extStringDataArrSize];
         size_t i=0;
         for (boost::unordered_map<uint32_t, string>::iterator it=sh->data.begin(), endIt=sh->data.end(); it != endIt; ++it) {
             sh->extStringDataArr[i].id = it->first;
@@ -207,7 +207,7 @@ LIBSTRINGS unsigned int GetStrings(strings_handle sh, string_data ** strings, si
 }
 
 /* Gets an array of any strings in the file that are not assigned IDs. */
-LIBSTRINGS unsigned int GetUnreferencedStrings(strings_handle sh, char *** strings, size_t * numStrings) {
+LIBSTRINGS unsigned int st_get_unref_strings(st_strings_handle sh, char *** strings, size_t * numStrings) {
     if (sh == NULL || strings == NULL || numStrings == NULL) //Check for valid args.
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -250,7 +250,7 @@ LIBSTRINGS unsigned int GetUnreferencedStrings(strings_handle sh, char *** strin
 }
 
 /* Gets the string with the given ID from the file. */
-LIBSTRINGS unsigned int GetString(strings_handle sh, const uint32_t stringId, char ** string) {
+LIBSTRINGS unsigned int st_get_string(st_strings_handle sh, const uint32_t stringId, char ** string) {
     if (sh == NULL || string == NULL) //Check for valid args.
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -287,7 +287,7 @@ LIBSTRINGS unsigned int GetString(strings_handle sh, const uint32_t stringId, ch
 ------------------------------*/
 
 /* Replaces all existing strings in the file with the given strings. */
-LIBSTRINGS unsigned int SetStrings(strings_handle sh, const string_data * strings, const size_t numStrings) {
+LIBSTRINGS unsigned int st_set_strings(st_strings_handle sh, const st_string_data * strings, const size_t numStrings) {
     if (sh == NULL || strings == NULL) //Check for valid args.
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -308,7 +308,7 @@ LIBSTRINGS unsigned int SetStrings(strings_handle sh, const string_data * string
 }
 
 /* Adds the given string to the file. */
-LIBSTRINGS unsigned int AddString(strings_handle sh, const uint32_t stringId, const char * str) {
+LIBSTRINGS unsigned int st_add_string(st_strings_handle sh, const uint32_t stringId, const char * str) {
     if (sh == NULL || str == NULL) //Check for valid args.
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -319,7 +319,7 @@ LIBSTRINGS unsigned int AddString(strings_handle sh, const uint32_t stringId, co
 }
 
 /* Replaces the string corresponding to the given ID with the given string. */
-LIBSTRINGS unsigned int EditString(strings_handle sh, const uint32_t stringId, const char * newString) {
+LIBSTRINGS unsigned int st_replace_string(st_strings_handle sh, const uint32_t stringId, const char * newString) {
     if (sh == NULL || newString == NULL) //Check for valid args.
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -333,7 +333,7 @@ LIBSTRINGS unsigned int EditString(strings_handle sh, const uint32_t stringId, c
 }
 
 /* Removes the string corresponding to the given ID. */
-LIBSTRINGS unsigned int RemoveString(strings_handle sh, const uint32_t stringId) {
+LIBSTRINGS unsigned int st_remove_string(st_strings_handle sh, const uint32_t stringId) {
     if (sh == NULL) //Check for valid args.
         return c_error(LIBSTRINGS_ERROR_INVALID_ARGS, "Null pointer passed.");
 

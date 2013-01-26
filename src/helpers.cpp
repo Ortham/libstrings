@@ -24,8 +24,13 @@
 #include "helpers.h"
 #include "libstrings.h"
 #include "error.h"
+
 #include <cstring>
+
+#include <source/utf8.h>
+
 #include <boost/locale.hpp>
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 
@@ -38,6 +43,9 @@ namespace libstrings {
     }
 
     std::string ToUTF8(const std::string& str, const std::string& encoding) {
+        if (utf8::is_valid(str.begin(), str.end()) || boost::iequals("UTF-8", encoding))
+            return str;
+
         try {
             return boost::locale::conv::to_utf<char>(str, encoding, boost::locale::conv::stop);
         } catch (boost::locale::conv::conversion_error& e) {
@@ -46,6 +54,8 @@ namespace libstrings {
     }
 
     std::string FromUTF8(const std::string& str, const std::string& encoding) {
+        if (boost::iequals("UTF-8", encoding))
+            return str;
         try {
             return boost::locale::conv::from_utf<char>(str, encoding, boost::locale::conv::stop);
         } catch (boost::locale::conv::conversion_error& e) {
