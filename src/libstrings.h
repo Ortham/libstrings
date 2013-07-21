@@ -31,7 +31,7 @@
 
     libstrings uses character strings and integers for information input/output.
       - All strings are null-terminated byte character strings encoded in UTF-8.
-      - All return, game and load order method codes are unsigned integers at least 16 bits in size.
+      - All return codes are unsigned integers at least 16 bits in size.
       - All array sizes are unsigned integers at least 16 bits in size.
       - File paths are case-sensitive if and only if the underlying file system is case-sensitive.
 
@@ -91,7 +91,7 @@ extern "C"
 ------------------------------*/
 
 /**
-    @brief A structure that holds all game-specific data used by libloadorder.
+    @brief A structure that holds all game-specific data used by libstrings.
     @details Used to keep each strings file's data independent. Abstracts the definition of libstrings' internal state while still providing type safety across the library's functions. Multiple handles can also be made for each strings file, though it should be kept in mind that libstrings is not thread-safe.
 */
 typedef struct _strings_handle_int * st_strings_handle;
@@ -201,7 +201,7 @@ LIBSTRINGS unsigned int st_save(st_strings_handle sh, const char * const path, c
 
 /**
     @brief Closes an existing handle.
-    @brief Closes an existing handle, freeing any memory allocated during its use.
+    @details Closes an existing handle, freeing any memory allocated during its use.
     @param sh The handle to be destroyed.
 */
 LIBSTRINGS void st_close(st_strings_handle sh);
