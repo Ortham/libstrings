@@ -56,7 +56,7 @@ _strings_handle_int::_strings_handle_int(const string& path, const string& fallb
 
     //If the file already exists, parse it.
     if (fs::exists(path)) {
-        libstrings::ifstream in(path.c_str(), ios::binary);
+        libstrings::ifstream in(fs::path(path), ios::binary);
         in.exceptions(ios::failbit | ios::badbit | ios::eofbit);  //Causes ifstream::failure to be thrown if problem is encountered.
 
         /*The data for each string is stored in two separate places.
@@ -212,7 +212,7 @@ void _strings_handle_int::Save(const std::string& path, const std::string& encod
     uint32_t dataSize = strData.length();
 
     //Now write out everything.
-    libstrings::ofstream out(path.c_str(), ios::binary | ios::trunc);
+    libstrings::ofstream out(fs::path(path), ios::binary | ios::trunc);
     if (!out.good())
         throw error(LIBSTRINGS_ERROR_FILE_WRITE_FAIL, "Could not write to \"" + path + "\".");
     out.write((char*)&count, sizeof(uint32_t));

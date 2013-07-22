@@ -24,8 +24,9 @@
 #include "libstrings.h"
 #include "streams.h"
 
-#include <iostream>
 #include <stdint.h>
+
+#include <boost/filesystem.hpp>
 
 using namespace std;
 
@@ -43,7 +44,7 @@ int main() {
     char ** stringArr;
     size_t stringArrSize;
 
-    libstrings::ofstream out("libstrings-tester.txt");
+    libstrings::ofstream out(boost::filesystem::path("libstrings-tester.txt"));
     if (!out.good()){
         cout << "File could not be opened for reading.";
         return 1;
