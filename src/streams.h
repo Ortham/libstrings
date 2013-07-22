@@ -20,6 +20,8 @@
     along with libstrings.  If not, see
     <http://www.gnu.org/licenses/>.
 */
+#ifndef __LIBSTRINGS_STREAMS_H__
+#define __LIBSTRINGS_STREAMS_H__
 
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
@@ -29,3 +31,5 @@ namespace libstrings {
     typedef boost::iostreams::stream< boost::iostreams::file_descriptor_source > ifstream;
     typedef boost::iostreams::stream< boost::iostreams::file_descriptor > fstream;
 }
+
+#endif
