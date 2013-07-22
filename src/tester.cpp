@@ -22,10 +22,10 @@
 */
 
 #include "libstrings.h"
+#include "streams.h"
 
 #include <iostream>
 #include <stdint.h>
-#include <fstream>
 
 using namespace std;
 
@@ -43,7 +43,7 @@ int main() {
     char ** stringArr;
     size_t stringArrSize;
 
-    std::ofstream out("libstrings-tester.txt");
+    libstrings::ofstream out("libstrings-tester.txt");
     if (!out.good()){
         cout << "File could not be opened for reading.";
         return 1;

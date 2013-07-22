@@ -25,8 +25,8 @@
 #include "libstrings.h"
 #include "error.h"
 #include "helpers.h"
+#include "streams.h"
 #include <cstdio>
-#include <fstream>
 #include <sstream>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
@@ -56,8 +56,8 @@ _strings_handle_int::_strings_handle_int(const string& path, const string& fallb
 
     //If the file already exists, parse it.
     if (fs::exists(path)) {
-        ifstream in(path.c_str(), ios::binary);
-        in.exceptions(ifstream::failbit | ifstream::badbit | ifstream::eofbit);  //Causes ifstream::failure to be thrown if problem is encountered.
+        libstrings::ifstream in(path.c_str(), ios::binary);
+        in.exceptions(ios::failbit | ios::badbit | ios::eofbit);  //Causes ifstream::failure to be thrown if problem is encountered.
 
         /*The data for each string is stored in two separate places.
         The directory holds all the IDs and offsets, and the data block
@@ -212,7 +212,7 @@ void _strings_handle_int::Save(const std::string& path, const std::string& encod
     uint32_t dataSize = strData.length();
 
     //Now write out everything.
-    ofstream out(path.c_str(), ios::binary | ios::trunc);
+    libstrings::ofstream out(path.c_str(), ios::binary | ios::trunc);
     if (!out.good())
         throw error(LIBSTRINGS_ERROR_FILE_WRITE_FAIL, "Could not write to \"" + path + "\".");
     out.write((char*)&count, sizeof(uint32_t));
